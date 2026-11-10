@@ -84,7 +84,7 @@ You don't need to undo anything before updating. If you'd rather start clean, **
 
 ## Other workarounds
 
-**Put the amdkmpfd files back (AMD motherboards only).** The utility loops because it can't find the files of `amdkmpfd`, the "AMD PCI Root Bus Lower Filter" driver, which newer packages no longer include. Copying the three amdkmpfd files from the Adrenalin 26.3.1 package into `C:\Windows\System32\AMD\amdkmpfd\` stops the writes. Steps and discussion are in [this r/buildapc thread](https://www.reddit.com/r/buildapc/s/mkT8v7ktK6).
+**Put the amdkmpfd files back (AMD motherboards only).** The utility loops because it can't find the files of `amdkmpfd`, the "AMD PCI Root Bus Lower Filter" driver, which newer packages no longer include. Copying the three amdkmpfd files from the Adrenalin 26.3.1 package (`amdkmpfd.ctz`, `amdkmpfd.itz` and `amdkmpfd.stz`, names via u/BitRunner64) into `C:\Windows\System32\AMD\amdkmpfd\` stops the writes. To get them, extract the 26.3.1 installer (for example with 7-Zip) and search inside it for `amdkmpfd`. Steps and discussion are in [this r/buildapc thread](https://www.reddit.com/r/buildapc/s/mkT8v7ktK6).
 
 - It's a boot-start driver for AMD chipsets, so it only makes sense on AMD motherboards. Don't do this on Intel.
 - It runs a kernel driver from an older package that AMD dropped. People using it report no stutters or driver timeouts, but it carries more risk than a permission on one file.
