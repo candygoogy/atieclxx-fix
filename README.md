@@ -84,12 +84,12 @@ You don't need to undo anything before updating. If you'd rather start clean, **
 
 ## Other workarounds
 
-**Put the amdkmpfd files back (AMD motherboards only).** The utility loops because it can't find the files of `amdkmpfd`, the "AMD PCI Root Bus Lower Filter" driver, which newer packages no longer include. Copying the three amdkmpfd files from the Adrenalin 26.3.1 package (`amdkmpfd.ctz`, `amdkmpfd.itz` and `amdkmpfd.stz`, names via u/BitRunner64) into `C:\Windows\System32\AMD\amdkmpfd\` stops the writes. To get them, extract the 26.3.1 installer (for example with 7-Zip) and search inside it for `amdkmpfd`. Steps and discussion are in [this r/buildapc thread](https://www.reddit.com/r/buildapc/s/mkT8v7ktK6).
+**Put the amdkmpfd files back.** The utility loops because it can't find three files that Adrenalin 26.3.1 and older put in `C:\Windows\System32\AMD\amdkmpfd\`: `amdkmpfd.ctz`, `amdkmpfd.itz` and `amdkmpfd.stz` (names via u/BitRunner64). Copying them back from the 26.3.1 package stops the writes. To get them, extract the 26.3.1 installer (for example with 7-Zip) and search inside it for `amdkmpfd`. Steps and discussion are in [this r/buildapc thread](https://www.reddit.com/r/buildapc/s/mkT8v7ktK6).
 
-- It's a boot-start driver for AMD chipsets, so it only makes sense on AMD motherboards. Don't do this on Intel.
-- It runs a kernel driver from an older package that AMD dropped. People using it report no stutters or driver timeouts, but it carries more risk than a permission on one file.
-- **Never remove it with `sc delete amdkmpfd`.** It's a boot filter, and deleting the service leaves Windows unable to boot (`INACCESSIBLE_BOOT_DEVICE`, confirmed by u/lt_catscratch, who had to use a restore point). To remove it, uninstall Adrenalin and run the AMD Cleanup Utility.
-- With the files in place the driver gets loaded and used, but the loop checks only that the files exist: with them removed, the writes came back even though the driver was still loaded. Thanks to u/lt_catscratch for [testing this](https://www.reddit.com/r/AMDHelp/s/Bchh9rfWuv).
+- The files don't install or load anything. The utility only checks that they exist: remove them and the writes come back. Thanks to u/lt_catscratch for [testing this](https://www.reddit.com/r/AMDHelp/s/Bchh9rfWuv).
+- People using it report no stutters or driver timeouts.
+- So far it has only been tried on AMD motherboards.
+- **Don't touch the `amdkmpfd` driver itself.** On AMD boards, `amdkmpfd.sys` ("AMD PCI Root Bus Lower Filter") comes with the AMD chipset driver and is a boot filter. Deleting it with `sc delete amdkmpfd` leaves Windows unable to boot (`INACCESSIBLE_BOOT_DEVICE`, confirmed by u/lt_catscratch, who had to use a restore point).
 
 **Disable the service.** Set "AMD External Events Utility" to Disabled in `services.msc`. That stops the writes, but you may lose Adrenalin hotkeys, and possibly FreeSync.
 
@@ -97,8 +97,7 @@ You don't need to undo anything before updating. If you'd rather start clean, **
 |---|---|---|---|
 | Stops the writes | yes | yes | yes |
 | Service keeps running | yes | yes | no |
-| Works on Intel boards | yes | no | yes |
-| Installs a kernel driver | no | yes (from 26.3.1) | no |
+| What it changes | one permission | adds 3 files | disables a service |
 
 ## Tested on
 

@@ -59,16 +59,20 @@ After restarting the service, the new process wrote 0 bytes in its first 70 seco
 
 ## 5. What the loop is waiting for
 
-`amdkmpfd` is the "AMD PCI Root Bus Lower Filter" (kernel driver, `BOOT_START`, load order group "Boot Bus Extender", binary `\SystemRoot\System32\drivers\amdkmpfd.sys`).
+The utility looks for three files in `C:\Windows\System32\AMD\amdkmpfd\`: `amdkmpfd.ctz`, `amdkmpfd.itz` and `amdkmpfd.stz`. Adrenalin 26.3.1 and older put them there; newer packages don't.
 
-On the test PC (Ryzen 9800X3D, X870E) it isn't installed at all: no `amdkmpfd` service, no amdkmpfd files in `drivers`, the DriverStore or the current AMD installer packages, and it's not in the Upper/LowerFilters of any AMD PCI device. The `C:\Windows\System32\AMD\AMDKMPFD` folder doesn't exist.
+On the test PC (Ryzen 9800X3D, X870E) the folder doesn't exist, and none of the current AMD installer packages contain the files.
 
 Findings from u/lt_catscratch (7900 XTX, Adrenalin 26.9.2) in [the Reddit thread](https://www.reddit.com/r/AMDHelp/s/Bchh9rfWuv):
 
-- With the three amdkmpfd files from the 26.3.1 package copied into `C:\Windows\System32\AMD\amdkmpfd\`, the driver gets installed, loaded and used (`sc query amdkmpfd`: RUNNING), and the writes stop.
-- With the files removed again, the writes come back, even though the driver is still loaded.
+- With the three files from the 26.3.1 package copied into that folder, the writes stop.
+- With the files removed again, the writes come back.
 
-So the utility is trying to install the filter driver, but its loop checks only that the files exist, not whether the driver is running.
+The files don't install or load anything. The utility only checks that they exist.
+
+Separately, `amdkmpfd.sys` ("AMD PCI Root Bus Lower Filter", a `BOOT_START` driver in load order group "Boot Bus Extender") comes with the AMD chipset driver on AMD motherboards. It runs whether or not the three files are there, and it isn't what the loop is waiting for. Don't delete its service: `sc delete amdkmpfd` left a test PC unable to boot (`INACCESSIBLE_BOOT_DEVICE`).
+
+A related test: deleting the empty `C:\Program Files\AMD\amdkmpfd_in` folder doesn't help, because the utility recreates it within seconds.
 
 ## 6. Reboots and driver updates
 
