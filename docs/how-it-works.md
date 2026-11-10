@@ -56,3 +56,10 @@ After that, the copy attempts end in `CreateFile ... ACCESS DENIED`, and in the 
 - the process kept running with the same PID
 
 After restarting the service, the new process wrote 0 bytes in its first 70 seconds.
+
+## 5. Reboots and driver updates
+
+- **Who uses the copy:** no service, scheduled task, Run key or running process points to `...\systemprofile\AppData\Local\AMD\atieclxx.exe`. The service runs `atiesrxx.exe` from the DriverStore, and that starts `atieclxx.exe` from the DriverStore too. Blocking the copy only stops the rewriting.
+- **Driver installs leave it alone:** the copy on the test PC was created on 29 Oct, and the current driver package was installed on 30 Oct (`setupapi.dev.log`, DriverStore folder date). The installer didn't delete or recreate it; the utility kept overwriting it in place.
+- **One limit:** SYSTEM has full control of the parent folder, so it can still *delete* the copy and create a new one, which would carry normal permissions. Tested with a dummy file and a task running as SYSTEM. The current utility never deletes; it only overwrites, and that's what the block stops. If a future driver deletes the file first, the fix would be lost, and **Check** would show the writes again.
+- **Stale copy after an update:** the script compares the copy's SHA-256 with the running `atieclxx.exe`. When they differ, **Fix** lifts the block, lets the new driver refresh its copy, measures again, and blocks again only if the writes are back. Simulated by changing one byte of the copy: Fix refreshed it, measured 595 KB/s, blocked again, and ended at 0 B/s.

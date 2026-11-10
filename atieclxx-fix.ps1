@@ -1,7 +1,7 @@
 <#
 .SYNOPSIS
     Stops the AMD External Events Utility (atieclxx.exe) from rewriting its own
-    677 KB copy every second, which writes ~40 GB a day to the system SSD.
+    677 KB copy every second, which writes 40-55 GB a day to the system SSD.
 
 .DESCRIPTION
     atieclxx.exe copies itself from the DriverStore to
@@ -13,7 +13,10 @@
     The copy fails before any data is written, the existing copy (identical to
     the original) stays in place, and the service keeps running.
 
-    Run with no switch for a menu. Needs admin for -Fix and -Undo.
+    -Fix only blocks the copy when the writes are really happening, and after a
+    driver update it lets the new driver refresh its copy before re-testing.
+
+    Run with no switch for a menu. -Fix and -Undo need administrator rights.
 
 .EXAMPLE
     .\atieclxx-fix.ps1 -Check
@@ -31,8 +34,9 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$Copy        = Join-Path $env:SystemRoot 'System32\config\systemprofile\AppData\Local\AMD\atieclxx.exe'
-$SystemSid   = 'S-1-5-18'
+$Version   = '1.0.0'
+$Copy      = Join-Path $env:SystemRoot 'System32\config\systemprofile\AppData\Local\AMD\atieclxx.exe'
+$SystemSid = 'S-1-5-18'
 # Normal background writes from this utility are close to zero. The bug writes ~650 KB/s.
 $AffectedBytesPerSec = 50KB
 
@@ -50,6 +54,21 @@ function Format-Bytes([double]$b) {
     if ($b -ge 1MB) { return ('{0:N1} MB' -f ($b / 1MB)) }
     if ($b -ge 1KB) { return ('{0:N0} KB' -f ($b / 1KB)) }
     return ('{0:N0} B' -f $b)
+}
+
+# SHA-256 via .NET, so it works in every PowerShell without loading extra modules.
+function Get-Sha256([string]$path) {
+    $sha = [Security.Cryptography.SHA256]::Create()
+    $fs = [IO.File]::Open($path, 'Open', 'Read', 'ReadWrite')
+    try { return [BitConverter]::ToString($sha.ComputeHash($fs)) } finally { $fs.Dispose(); $sha.Dispose() }
+}
+
+# True when the copy no longer matches the running driver's atieclxx.exe (driver was updated).
+# $null when it can't tell (not admin, or the utility isn't running).
+function Test-CopyStale {
+    $proc = Get-Utility
+    if (-not $proc -or -not $proc.ExecutablePath -or -not (Test-Path -LiteralPath $Copy)) { return $null }
+    return (Get-Sha256 $proc.ExecutablePath) -ne (Get-Sha256 $Copy)
 }
 
 # Bytes per second written by atieclxx.exe over $sec seconds, or $null if it isn't running.
@@ -75,8 +94,16 @@ function Test-FixApplied {
     return $false
 }
 
+function Invoke-Icacls([string[]]$icaclsArgs) {
+    $out = & icacls.exe @icaclsArgs 2>&1
+    if ($LASTEXITCODE -ne 0) { throw "icacls failed: $out" }
+}
+
+function Add-Block    { Invoke-Icacls @($Copy, '/deny', "*${SystemSid}:(W,D)") }
+function Remove-Block { Invoke-Icacls @($Copy, '/remove:d', "*$SystemSid") }
+
 function Show-Status {
-    $proc  = Get-Utility
+    $proc = Get-Utility
     # The menu already printed the status; don't print it again for the chosen action.
     if ($script:StatusShown) { return $proc }
     $script:StatusShown = $true
@@ -84,7 +111,7 @@ function Show-Status {
     $drv   = Get-CimInstance Win32_VideoController | Where-Object { $_.Name -match 'Radeon|AMD' } | Select-Object -First 1
 
     Write-Host ''
-    Write-Host 'atieclxx-fix status' -ForegroundColor Cyan
+    Write-Host ("atieclxx-fix {0}" -f $Version) -ForegroundColor Cyan
     if ($drv) { Write-Host ("  GPU / driver:   {0} / {1}" -f $drv.Name, $drv.DriverVersion) }
     if ($proc) {
         $up = (Get-Date) - $proc.CreationDate
@@ -94,8 +121,11 @@ function Show-Status {
         Write-Host '  atieclxx.exe:   not running (nothing to fix right now)'
     }
     if ($admin) {
-        $state = if (-not (Test-Path -LiteralPath $Copy)) { 'target file not found' }
-                 elseif (Test-FixApplied) { 'APPLIED' } else { 'not applied' }
+        if (-not (Test-Path -LiteralPath $Copy)) { $state = 'target file not found' }
+        elseif (Test-FixApplied) {
+            $state = 'APPLIED'
+            if (Test-CopyStale) { $state = 'APPLIED, but the driver changed since (run Fix to refresh)' }
+        } else { $state = 'not applied' }
         Write-Host ("  Fix:            {0}" -f $state)
     } else {
         Write-Host '  Fix:            unknown (run as administrator to see)'
@@ -118,11 +148,6 @@ function Invoke-Check {
     }
 }
 
-function Invoke-Icacls([string[]]$icaclsArgs) {
-    $out = & icacls.exe @icaclsArgs 2>&1
-    if ($LASTEXITCODE -ne 0) { throw "icacls failed: $out" }
-}
-
 function Invoke-Fix {
     if (-not (Test-Admin)) { throw 'The fix needs administrator rights. Right-click and run as administrator.' }
     [void](Show-Status)
@@ -131,33 +156,51 @@ function Invoke-Fix {
         Write-Host ''
         Write-Host "  The file this fix protects doesn't exist on this PC:" -ForegroundColor Yellow
         Write-Host "  $Copy"
-        Write-Host '  Your writes (if any) come from a different cause. Please open an issue with the output of -Check.'
+        Write-Host '  Your writes (if any) come from a different cause. Please open an issue with the output of Check.'
         return
     }
-    if (Test-FixApplied) { Write-Host '  Fix is already applied. Measuring to confirm...' }
-    else {
+
+    # After a driver update the blocked copy is the old version. Let the new driver
+    # refresh it, then test the new driver from scratch.
+    if ((Test-FixApplied) -and (Test-CopyStale)) {
+        Write-Host ''
+        Write-Host '  The AMD driver changed since the fix was applied. Letting it refresh its copy...'
+        Remove-Block
+        Start-Sleep -Seconds 5
+        if (Test-CopyStale) { Write-Host '  (The copy has not refreshed yet. That is fine; testing anyway.)' -ForegroundColor DarkGray }
+    }
+
+    if (Test-FixApplied) {
+        Write-Host ''
+        Write-Host '  Fix is already applied. Measuring to confirm...'
+    } else {
         Write-Host ''
         Write-Host 'Before:' -ForegroundColor Cyan
         $before = Measure-Writes $Seconds
-        if ($null -ne $before) { Write-Host ("  {0}/s" -f (Format-Bytes $before)) }
-
-        Invoke-Icacls @($Copy, '/deny', "*${SystemSid}:(W,D)")
+        if ($null -eq $before) { Write-Host '  atieclxx.exe restarted during the measurement. Try again in a minute.' -ForegroundColor Yellow; return }
+        Write-Host ("  {0}/s" -f (Format-Bytes $before))
+        if ($before -lt $AffectedBytesPerSec) {
+            Write-Host ''
+            Write-Host '  Not affected: atieclxx.exe is not constantly writing, so nothing was changed.' -ForegroundColor Green
+            return
+        }
+        Add-Block
         Write-Host '  Applied: SYSTEM can no longer overwrite or delete the copy.' -ForegroundColor Green
     }
 
     Write-Host ''
     Write-Host 'After:' -ForegroundColor Cyan
     $after = Measure-Writes $Seconds
-    if ($null -eq $after) { Write-Host '  atieclxx.exe restarted during the measurement. Run -Check in a minute.' -ForegroundColor Yellow; return }
+    if ($null -eq $after) { Write-Host '  atieclxx.exe restarted during the measurement. Run Check in a minute.' -ForegroundColor Yellow; return }
     Write-Host ("  {0}/s" -f (Format-Bytes $after))
     Write-Host ''
     if ($after -lt $AffectedBytesPerSec) {
         Write-Host '  FIXED. The constant writes have stopped.' -ForegroundColor Green
-        Write-Host '  The fix stays after a reboot. Run -Undo before you install a new AMD driver.'
+        Write-Host '  It stays fixed after a reboot. After an AMD driver update, run Fix once more.'
     } else {
         Write-Host '  Still writing, so this PC has a different variant of the bug. Rolling back.' -ForegroundColor Yellow
-        Invoke-Icacls @($Copy, '/remove:d', "*$SystemSid")
-        Write-Host '  Rolled back. Please open an issue with the output of -Check.'
+        Remove-Block
+        Write-Host '  Rolled back. Please open an issue with the output of Check.'
     }
 }
 
@@ -165,7 +208,7 @@ function Invoke-Undo {
     if (-not (Test-Admin)) { throw 'Undo needs administrator rights. Right-click and run as administrator.' }
     if (-not (Test-Path -LiteralPath $Copy)) { Write-Host '  Target file not found. Nothing to undo.'; return }
     if (-not (Test-FixApplied)) { Write-Host '  Fix is not applied. Nothing to undo.'; return }
-    Invoke-Icacls @($Copy, '/remove:d', "*$SystemSid")
+    Remove-Block
     Write-Host '  Undone. Permissions on the copy are back to normal.' -ForegroundColor Green
 }
 
@@ -177,7 +220,9 @@ try {
         [void](Show-Status)
         Write-Host ''
         Write-Host '  [C] Check   [F] Fix   [U] Undo   [Q] Quit'
-        switch ((Read-Host '  Choose').Trim().ToUpper()) {
+        $choice = Read-Host '  Choose'
+        if ($null -eq $choice) { $choice = '' }
+        switch ($choice.Trim().ToUpper()) {
             'C' { Invoke-Check }
             'F' { Invoke-Fix }
             'U' { Invoke-Undo }
