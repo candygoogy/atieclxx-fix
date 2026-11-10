@@ -57,7 +57,20 @@ After that, the copy attempts end in `CreateFile ... ACCESS DENIED`, and in the 
 
 After restarting the service, the new process wrote 0 bytes in its first 70 seconds.
 
-## 5. Reboots and driver updates
+## 5. What the loop is waiting for
+
+`amdkmpfd` is the "AMD PCI Root Bus Lower Filter" (kernel driver, `BOOT_START`, load order group "Boot Bus Extender", binary `\SystemRoot\System32\drivers\amdkmpfd.sys`).
+
+On the test PC (Ryzen 9800X3D, X870E) it isn't installed at all: no `amdkmpfd` service, no amdkmpfd files in `drivers`, the DriverStore or the current AMD installer packages, and it's not in the Upper/LowerFilters of any AMD PCI device. The `C:\Windows\System32\AMD\AMDKMPFD` folder doesn't exist.
+
+Findings from u/lt_catscratch (7900 XTX, Adrenalin 26.9.2) in [the Reddit thread](https://www.reddit.com/r/AMDHelp/s/Bchh9rfWuv):
+
+- With the three amdkmpfd files from the 26.3.1 package copied into `C:\Windows\System32\AMD\amdkmpfd\`, the driver gets installed, loaded and used (`sc query amdkmpfd`: RUNNING), and the writes stop.
+- With the files removed again, the writes come back, even though the driver is still loaded.
+
+So the utility is trying to install the filter driver, but its loop checks only that the files exist, not whether the driver is running.
+
+## 6. Reboots and driver updates
 
 - **Who uses the copy:** no service, scheduled task, Run key or running process points to `...\systemprofile\AppData\Local\AMD\atieclxx.exe`. The service runs `atiesrxx.exe` from the DriverStore, and that starts `atieclxx.exe` from the DriverStore too. Blocking the copy only stops the rewriting.
 - **Driver installs leave it alone:** the copy on the test PC was created on 29 Oct, and the current driver package was installed on 30 Oct (`setupapi.dev.log`, DriverStore folder date). The installer didn't delete or recreate it; the utility kept overwriting it in place.

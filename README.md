@@ -82,10 +82,29 @@ Nothing on Windows launches that copy: no service, scheduled task or startup ent
 
 You don't need to undo anything before updating. If you'd rather start clean, **U** removes the fix.
 
+## Other workarounds
+
+**Put the amdkmpfd files back (AMD motherboards only).** The utility loops because it can't find the files of `amdkmpfd`, the "AMD PCI Root Bus Lower Filter" driver, which newer packages no longer include. Copying the three amdkmpfd files from the Adrenalin 26.3.1 package into `C:\Windows\System32\AMD\amdkmpfd\` stops the writes. Steps and discussion are in [this r/buildapc thread](https://www.reddit.com/r/buildapc/s/mkT8v7ktK6).
+
+- It's a boot-start driver for AMD chipsets, so it only makes sense on AMD motherboards. Don't do this on Intel.
+- It runs a kernel driver from an older package that AMD dropped. People using it report no stutters or driver timeouts, but it carries more risk than a permission on one file.
+- With the files in place the driver gets loaded and used, but the loop checks only that the files exist: with them removed, the writes came back even though the driver was still loaded. Thanks to u/lt_catscratch for [testing this](https://www.reddit.com/r/AMDHelp/s/Bchh9rfWuv).
+
+**Disable the service.** Set "AMD External Events Utility" to Disabled in `services.msc`. That stops the writes, but you may lose Adrenalin hotkeys, and possibly FreeSync.
+
+| | This repo | amdkmpfd files | Disable service |
+|---|---|---|---|
+| Stops the writes | yes | yes | yes |
+| Service keeps running | yes | yes | no |
+| Works on Intel boards | yes | no | yes |
+| Installs a kernel driver | no | yes (from 26.3.1) | no |
+
 ## Tested on
 
 - Windows 11, Radeon RX 9070 XT, driver 32.0.32015.12012 (28 Oct 2026)
 - Windows PowerShell 5.1 and PowerShell 7
+
+The same loop has been reported on a 7900 XTX with Adrenalin 26.9.2.
 
 Reports from other GPUs and driver versions help. [Open an issue](https://github.com/candygoogy/atieclxx-fix/issues/new?template=report.md) with the output of **Check**, whether the fix worked or not.
 
