@@ -88,6 +88,7 @@ You don't need to undo anything before updating. If you'd rather start clean, **
 
 - It's a boot-start driver for AMD chipsets, so it only makes sense on AMD motherboards. Don't do this on Intel.
 - It runs a kernel driver from an older package that AMD dropped. People using it report no stutters or driver timeouts, but it carries more risk than a permission on one file.
+- **Never remove it with `sc delete amdkmpfd`.** It's a boot filter, and deleting the service leaves Windows unable to boot (`INACCESSIBLE_BOOT_DEVICE`, confirmed by u/lt_catscratch, who had to use a restore point). To remove it, uninstall Adrenalin and run the AMD Cleanup Utility.
 - With the files in place the driver gets loaded and used, but the loop checks only that the files exist: with them removed, the writes came back even though the driver was still loaded. Thanks to u/lt_catscratch for [testing this](https://www.reddit.com/r/AMDHelp/s/Bchh9rfWuv).
 
 **Disable the service.** Set "AMD External Events Utility" to Disabled in `services.msc`. That stops the writes, but you may lose Adrenalin hotkeys, and possibly FreeSync.
