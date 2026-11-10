@@ -65,18 +65,22 @@ function Measure-Writes([int]$sec) {
 
 function Test-FixApplied {
     if (-not (Test-Path -LiteralPath $Copy)) { return $false }
-    $acl = Get-Acl -LiteralPath $Copy
-    foreach ($rule in $acl.Access) {
-        if ($rule.AccessControlType -ne 'Deny') { continue }
-        try { $sid = $rule.IdentityReference.Translate([Security.Principal.SecurityIdentifier]).Value } catch { continue }
-        if ($sid -eq $SystemSid) { return $true }
+    # FileSecurity instead of Get-Acl: works in Windows PowerShell 5.1 and 7, even when
+    # 5.1 is started from 7 with a PSModulePath it can't load the Security module from.
+    $acl = New-Object System.Security.AccessControl.FileSecurity -ArgumentList $Copy, ([System.Security.AccessControl.AccessControlSections]::Access)
+    $rules = $acl.GetAccessRules($true, $true, [System.Security.Principal.SecurityIdentifier])
+    foreach ($rule in $rules) {
+        if ($rule.AccessControlType -eq 'Deny' -and $rule.IdentityReference.Value -eq $SystemSid) { return $true }
     }
     return $false
 }
 
 function Show-Status {
-    $admin = Test-Admin
     $proc  = Get-Utility
+    # The menu already printed the status; don't print it again for the chosen action.
+    if ($script:StatusShown) { return $proc }
+    $script:StatusShown = $true
+    $admin = Test-Admin
     $drv   = Get-CimInstance Win32_VideoController | Where-Object { $_.Name -match 'Radeon|AMD' } | Select-Object -First 1
 
     Write-Host ''
