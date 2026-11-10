@@ -34,7 +34,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$Version   = '1.0.0'
+$Version   = '1.0.1'
 $Copy      = Join-Path $env:SystemRoot 'System32\config\systemprofile\AppData\Local\AMD\atieclxx.exe'
 $SystemSid = 'S-1-5-18'
 # Normal background writes from this utility are close to zero. The bug writes ~650 KB/s.
@@ -108,11 +108,12 @@ function Show-Status {
     if ($script:StatusShown) { return $proc }
     $script:StatusShown = $true
     $admin = Test-Admin
-    $drv   = Get-CimInstance Win32_VideoController | Where-Object { $_.Name -match 'Radeon|AMD' } | Select-Object -First 1
+    # List every AMD GPU: PCs with a Ryzen iGPU have two, and the first one isn't always the card.
+    $gpus  = @(Get-CimInstance Win32_VideoController | Where-Object { $_.Name -match 'Radeon|AMD' })
 
     Write-Host ''
     Write-Host ("atieclxx-fix {0}" -f $Version) -ForegroundColor Cyan
-    if ($drv) { Write-Host ("  GPU / driver:   {0} / {1}" -f $drv.Name, $drv.DriverVersion) }
+    foreach ($g in $gpus) { Write-Host ("  GPU / driver:   {0} / {1}" -f $g.Name, $g.DriverVersion) }
     if ($proc) {
         $up = (Get-Date) - $proc.CreationDate
         Write-Host ("  atieclxx.exe:   running (PID {0}, up {1:N1} h)" -f $proc.ProcessId, $up.TotalHours)

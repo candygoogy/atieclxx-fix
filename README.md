@@ -72,7 +72,7 @@ Nothing on Windows launches that copy: no service, scheduled task or startup ent
 
 ## Reboots and driver updates
 
-**Reboots:** the fix is a file permission, so it's stored on the drive and survives restarts. When the AMD service starts again, the copy fails right away; in testing, a restarted service wrote 0 bytes.
+**Reboots:** the fix is a file permission, so it's stored on the drive and survives restarts. When the AMD service starts again, the copy fails right away. On the test PC, 14 minutes after a full reboot, `atieclxx.exe` had written 3.8 KB in total, where the bug would have written about 550 MB.
 
 **Driver updates:** the AMD installer leaves the copy alone, so the block stays in place. The new driver's utility can't refresh its copy, which is harmless because nothing runs it. After updating, run **`Fix-SSD-Writes.cmd` → F** once:
 
@@ -112,6 +112,9 @@ Reports from users (thanks!):
 | RX 7900 XTX | 26.10.1 | fixed, 54 GB/day → 0 B/s (u/schnepy) |
 | RX 7900 XTX | 26.10.2 | fixed (a friend of u/schnepy) |
 | RX 7900 XTX | 26.9.2 | same loop seen (u/lt_catscratch) |
+| RX 7600 | latest | same loop seen, about 1.3 MB/s (u/skylog6593) |
+
+Not everyone is affected, even on the same card and driver. So far, PCs that still have the amdkmpfd files from an older driver in `C:\Windows\System32\AMD\amdkmpfd\` don't loop.
 
 Reports from other GPUs and driver versions help. [Open an issue](https://github.com/candygoogy/atieclxx-fix/issues/new?template=report.md) with the output of **Check**, whether the fix worked or not.
 
