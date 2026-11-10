@@ -105,7 +105,13 @@ You don't need to undo anything before updating. If you'd rather start clean, **
 - Windows 11, Radeon RX 9070 XT, driver 32.0.32015.12012 (28 Oct 2026)
 - Windows PowerShell 5.1 and PowerShell 7
 
-The same loop has been reported on a 7900 XTX with Adrenalin 26.9.2.
+Reports from users (thanks!):
+
+| GPU | Adrenalin | Result |
+|---|---|---|
+| RX 7900 XTX | 26.10.1 | fixed, 54 GB/day → 0 B/s (u/schnepy) |
+| RX 7900 XTX | 26.10.2 | fixed (a friend of u/schnepy) |
+| RX 7900 XTX | 26.9.2 | same loop seen (u/lt_catscratch) |
 
 Reports from other GPUs and driver versions help. [Open an issue](https://github.com/candygoogy/atieclxx-fix/issues/new?template=report.md) with the output of **Check**, whether the fix worked or not.
 
