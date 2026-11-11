@@ -34,7 +34,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$Version   = '1.0.1'
+$Version   = '1.0.2'
 $Copy      = Join-Path $env:SystemRoot 'System32\config\systemprofile\AppData\Local\AMD\atieclxx.exe'
 $SystemSid = 'S-1-5-18'
 # Normal background writes from this utility are close to zero. The bug writes ~650 KB/s.
@@ -82,6 +82,16 @@ function Measure-Writes([int]$sec) {
     return [double]($b.WriteTransferCount - $a.WriteTransferCount) / $sec
 }
 
+# The loop is the utility trying to install the amdkmpfd filter driver from three setup
+# files. Read-only; printed so reports from different PCs can be compared.
+function Get-FilterState {
+    if (Test-Path -LiteralPath 'HKLM:\SYSTEM\CurrentControlSet\Services\amdkmpfd') { $driver = 'installed' } else { $driver = 'not installed' }
+    $dir = Join-Path $env:SystemRoot 'System32\AMD\amdkmpfd'
+    if (-not (Test-Path -LiteralPath $dir)) { return ('driver {0}, no setup folder' -f $driver) }
+    $found = @(Get-ChildItem -LiteralPath $dir -ErrorAction SilentlyContinue | Where-Object { $_.Extension -match '^\.(itz|stz|ctz)$' }).Count
+    return ('driver {0}, {1} of 3 setup files' -f $driver, $found)
+}
+
 function Test-FixApplied {
     if (-not (Test-Path -LiteralPath $Copy)) { return $false }
     # FileSecurity instead of Get-Acl: works in Windows PowerShell 5.1 and 7, even when
@@ -121,8 +131,9 @@ function Show-Status {
     } else {
         Write-Host '  atieclxx.exe:   not running (nothing to fix right now)'
     }
+    Write-Host ("  amdkmpfd:       {0}" -f (Get-FilterState))
     if ($admin) {
-        if (-not (Test-Path -LiteralPath $Copy)) { $state = 'target file not found' }
+        if (-not (Test-Path -LiteralPath $Copy)) { $state = 'not applied (the utility has made no copy on this PC)' }
         elseif (Test-FixApplied) {
             $state = 'APPLIED'
             if (Test-CopyStale) { $state = 'APPLIED, but the driver changed since (run Fix to refresh)' }
@@ -153,13 +164,6 @@ function Invoke-Fix {
     if (-not (Test-Admin)) { throw 'The fix needs administrator rights. Right-click and run as administrator.' }
     [void](Show-Status)
     if (-not (Get-Utility)) { Write-Host '  atieclxx.exe is not running. Nothing to fix.'; return }
-    if (-not (Test-Path -LiteralPath $Copy)) {
-        Write-Host ''
-        Write-Host "  The file this fix protects doesn't exist on this PC:" -ForegroundColor Yellow
-        Write-Host "  $Copy"
-        Write-Host '  Your writes (if any) come from a different cause. Please open an issue with the output of Check.'
-        return
-    }
 
     # After a driver update the blocked copy is the old version. Let the new driver
     # refresh it, then test the new driver from scratch.
@@ -183,6 +187,13 @@ function Invoke-Fix {
         if ($before -lt $AffectedBytesPerSec) {
             Write-Host ''
             Write-Host '  Not affected: atieclxx.exe is not constantly writing, so nothing was changed.' -ForegroundColor Green
+            return
+        }
+        if (-not (Test-Path -LiteralPath $Copy)) {
+            Write-Host ''
+            Write-Host '  atieclxx.exe is writing, but not to the file this fix protects:' -ForegroundColor Yellow
+            Write-Host "  $Copy"
+            Write-Host '  This PC has a different cause, so nothing was changed. Please open an issue with the output of Check.'
             return
         }
         Add-Block
