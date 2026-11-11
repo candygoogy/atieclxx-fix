@@ -36,7 +36,7 @@ System  WriteFile  ...\AppData\Local\AMD\atieclxx.exe  Offset: 0, Length: 679,93
 
 In 30 seconds there were 22 of those non-cached writes, 14.3 MB in total, or about 0.48 MB/s to the SSD.
 
-`amdkmpfd` is AMD's PCIe filter driver. The `.inf` and `.itz` files the utility looks for don't exist on this PC, which fits AMD's explanation that the bug comes from a filter-driver incompatibility.
+`amdkmpfd` is AMD's PCI filter driver. The `.inf` and `.itz` files the utility looks for don't exist on this PC, which fits AMD's explanation that the bug comes from a filter-driver incompatibility. Section 5 shows what the utility is doing with them.
 
 ## 3. What didn't work: read-only
 
@@ -57,26 +57,79 @@ After that, the copy attempts end in `CreateFile ... ACCESS DENIED`, and in the 
 
 After restarting the service, the new process wrote 0 bytes in its first 70 seconds.
 
-## 5. What the loop is waiting for
+## 5. What the loop is: a driver install that can't finish
 
-The utility looks for three files in `C:\Windows\System32\AMD\amdkmpfd\`: `amdkmpfd.ctz`, `amdkmpfd.itz` and `amdkmpfd.stz`. Adrenalin 26.3.1 and older put them there; newer packages don't.
+The utility is trying to install the `amdkmpfd` PCI filter driver, and the driver package no longer contains it.
 
-On the test PC (Ryzen 9800X3D, X870E) the folder doesn't exist, and none of the current AMD installer packages contain the files.
+**The driver package (`oem5.inf`, driver 32.0.32015.12012).** The INF still tells the utility where the filter driver's files are, through a value in the display adapter's registry key:
 
-Findings from u/lt_catscratch (7900 XTX, Adrenalin 26.9.2) in [the Reddit thread](https://www.reddit.com/r/AMDHelp/s/Bchh9rfWuv):
+```
+HKR,,AMDKMPFD,%REG_EXPAND_SZ%,%%SystemDrive%%\Windows\System32\AMD\AMDKMPFD
+```
+
+But the list of files it copies to that folder is empty:
+
+```
+[DestinationDirs]
+R300.AMDKMPFD = 11, AMD\amdkmpfd
+...
+[R300.AMDKMPFD]
+
+[DS.Graphics]
+```
+
+Ten install sections still reference that empty list: Navi31, Navi32, Navi33, Navi48, Phoenix, Strix, StrixHalo, GorgonHalo, Krackan and Krackan2e. The same INF sets `PciFilterDriverInstallEnabled = 0` under `HKLM\SYSTEM\CurrentControlSet\services\amdkmdap`, but `atieclxx.exe` never reads that value in the trace.
+
+**The three files are the driver.** `atieclxx.exe` contains the names of other AMD drivers in pairs: `amdfendr.itz` and `amdfendr.inf`, `amdfendr.stz` and `amdfendr.sys`, `amdfendr.ctz` and `amdfendr.cat`. So `amdkmpfd.itz`, `.stz` and `.ctz` are the filter driver's INF, SYS and CAT under staging names. Adrenalin 26.3.1 and older put them in `C:\Windows\System32\AMD\amdkmpfd\`; newer packages don't.
+
+**The installer is inside the utility.** Strings in `atieclxx.exe`:
+
+```
+InstallFilterDriver: CreateInstallPackage fails.
+InstallFilterDriver: The preinstall using SetupCopyOEMInfA failed.
+Merge: original lowerfilters already contains PCIF.
+UninstallPciBusFilter: DiUninstallDriver failed with GetLastError() = %d.
+EeuClientPathForPciFilterUnInstall
+SetupCopyOEMInfA   DiInstallDriverA   UpdateDriverForPlugAndPlayDevicesA
+```
+
+**One pass of the loop** (Process Monitor, registry and file events together):
+
+```
+RegQueryValue  HKLM\SYSTEM\Setup\SystemSetupInProgress                      0
+RegQueryValue  ...\Class\{4d36e968-...}\0000\KMD_InstallUncertifiedPFD     NAME NOT FOUND
+RegQueryValue  HKLM\SOFTWARE\AMD\EEU\KMD_InstallUncertifiedPFD             NAME NOT FOUND
+RegQueryValue  ...\Class\{4d36e968-...}\0000\amdkmpfd                      %SystemDrive%\Windows\System32\AMD\AMDKMPFD
+RegQueryValue  HKLM\SOFTWARE\AMD\EEU\RebootIsPending                       NAME NOT FOUND
+CreateFile     C:\Program Files\AMD\amdkmpfd_in                            (creates the folder if it's missing)
+-- copies itself to ...\systemprofile\AppData\Local\AMD\atieclxx.exe --
+CreateFile     C:\Program Files\AMD\amdkmpfd_un                            NAME NOT FOUND
+CreateFile     C:\Program Files\AMD\amdkmpfd_in\amdkmpfd.inf               NAME NOT FOUND
+CreateFile     C:\Windows\System32\AMD\AMDKMPFD\amdkmpfd.itz               PATH NOT FOUND  (4 tries)
+-- one second later, the same again --
+```
+
+Before that, each pass also reads the hardware ID of every device and opens every AMD PCI device.
+
+So the utility reads where the files should be, starts building an install package in `amdkmpfd_in`, can't find the first file, and starts over a second later. The self-copy appears to be a spare of the utility kept for removing the filter driver later (`EeuClientPathForPciFilterUnInstall`). There is no retry limit. u/KiKiHUN1 reached the same picture by reverse engineering the executable.
+
+**The test PC has no amdkmpfd driver at all.** There's no `amdkmpfd` service and no `amdkmpfd.sys`, with AMD Chipset Software 8.09.28.1124 installed (X870E). The bug also shows up on an Intel B660 motherboard ([issue #1](https://github.com/candygoogy/atieclxx-fix/issues/1)), so it doesn't depend on the AMD chipset driver.
+
+**What putting the files back does.** Findings from u/lt_catscratch (7900 XTX, Adrenalin 26.9.2) in [the Reddit thread](https://www.reddit.com/r/AMDHelp/s/Bchh9rfWuv):
 
 - With the three files from the 26.3.1 package copied into that folder, the writes stop.
 - With the files removed again, the writes come back.
+- On that PC, `amdkmpfd.sys` ("AMD PCI Root Bus Lower Filter") is a `BOOT_START` driver in load order group "Boot Bus Extender". Deleting its service with `sc delete amdkmpfd` left the PC unable to boot (`INACCESSIBLE_BOOT_DEVICE`).
 
-The files don't install or load anything. The utility only checks that they exist.
+Given the installer code above, the files most likely let the utility finish and install the 26.3.1 filter driver. That install hasn't been watched on the test PC, which doesn't have the files.
 
-Separately, `amdkmpfd.sys` ("AMD PCI Root Bus Lower Filter", a `BOOT_START` driver in load order group "Boot Bus Extender") comes with the AMD chipset driver on AMD motherboards. It runs whether or not the three files are there, and it isn't what the loop is waiting for. Don't delete its service: `sc delete amdkmpfd` left a test PC unable to boot (`INACCESSIBLE_BOOT_DEVICE`).
+**Not explained yet.** Some PCs have an empty `amdkmpfd` folder and no loop. The likely reason is that an older driver already installed the filter there, so the utility has nothing to do. The script's **Check** prints the driver and file state to help confirm that.
 
 A related test: deleting the empty `C:\Program Files\AMD\amdkmpfd_in` folder doesn't help, because the utility recreates it within seconds.
 
 ## 6. Reboots and driver updates
 
-- **Who uses the copy:** no service, scheduled task, Run key or running process points to `...\systemprofile\AppData\Local\AMD\atieclxx.exe`. The service runs `atiesrxx.exe` from the DriverStore, and that starts `atieclxx.exe` from the DriverStore too. Blocking the copy only stops the rewriting.
+- **Who uses the copy:** no service, scheduled task, Run key or running process points to `...\systemprofile\AppData\Local\AMD\atieclxx.exe`. The service runs `atiesrxx.exe` from the DriverStore, and that starts `atieclxx.exe` from the DriverStore too. The utility's own strings suggest it keeps the copy for removing the filter driver later (section 5). The fix only denies write and delete access to it.
 - **Driver installs leave it alone:** the copy on the test PC was created on 29 Oct, and the current driver package was installed on 30 Oct (`setupapi.dev.log`, DriverStore folder date). The installer didn't delete or recreate it; the utility kept overwriting it in place.
 - **One limit:** SYSTEM has full control of the parent folder, so it can still *delete* the copy and create a new one, which would carry normal permissions. Tested with a dummy file and a task running as SYSTEM. The current utility never deletes; it only overwrites, and that's what the block stops. If a future driver deletes the file first, the fix would be lost, and **Check** would show the writes again.
 - **Stale copy after an update:** the script compares the copy's SHA-256 with the running `atieclxx.exe`. When they differ, **Fix** lifts the block, lets the new driver refresh its copy, measures again, and blocks again only if the writes are back. Simulated by changing one byte of the copy: Fix refreshed it, measured 595 KB/s, blocked again, and ended at 0 B/s.
