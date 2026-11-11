@@ -31,6 +31,8 @@ The copy is one step of a driver install that can never finish. The utility is t
 
 On the test PC that came to **662 KB/s, or about 55 GB a day**. Process Monitor showed about 0.48 MB/s of it reaching the SSD as real disk writes. Traces and details: [docs/how-it-works.md](docs/how-it-works.md).
 
+At that rate it's about 20 TB a year. A typical 1 TB SSD is rated for around 600 TB of writes, so this alone won't wear one out quickly; small and cheap drives are rated for much less. Either way, it's constant writing that does nothing, and it's easy to stop.
+
 ## Am I affected?
 
 Open PowerShell (no admin needed) and paste:
@@ -93,6 +95,8 @@ No service, scheduled task or startup entry points to that copy. The utility app
 
 You don't need to undo anything before updating. If you'd rather start clean, **U** removes the fix.
 
+**DDU:** Display Driver Uninstaller has no cleanup step for the folder the copy is in (checked in its source), so the block should stay through a DDU reinstall too. One user reported 0 B/s after DDU and a fresh 26.10.2 install, with the fix applied beforehand. Run **F** once afterwards, the same as after any driver update.
+
 ## Other workarounds
 
 **Disable the service.** Set "AMD External Events Utility" to Disabled in `services.msc`. That stops the writes, but it can break FreeSync. [Dauntless-One measured it](https://github.com/Dauntless-One/amd-eeu-ssd-write-fix) with PresentMon: with the service disabled, VRR stopped working; with the service running and the same permission fix as this repo, VRR kept working. If you don't use FreeSync or Adrenalin hotkeys, disabling the service is fine.
@@ -128,16 +132,19 @@ Reports from users (thanks!):
 | RX 7600 | latest | same loop seen, about 1.3 MB/s | u/skylog6593 |
 | RX 6700 XT | not given | fixed | u/enduser1980 |
 
+Also reported fixed, card not given: u/wankerbanker85, u/Any_Juggernaut_112, u/FlurrySlurer, u/Romaryu.
+
 ## Who is affected
 
 The bug has been seen on RX 6700 XT, RX 7600, RX 7900 XTX, RX 9060 XT, RX 9070 and RX 9070 XT, with Adrenalin 26.9.2 to 26.10.2, on AMD and Intel motherboards.
 
-Other people with the same cards and drivers see no writes at all. Reports of no loop so far: RX 6750 XT, RX 6800 XT, RX 6950 XT, some RX 7900 XTX, RX 9070 and RX 9070 XT owners, and a Radeon 780M laptop on an older driver ([#2](https://github.com/candygoogy/atieclxx-fix/issues/2)).
+Other people with the same cards and drivers see no writes at all. Reports of no loop so far: RX 6750 XT, RX 6800 XT, RX 6950 XT, some RX 7900 XTX, RX 9070 and RX 9070 XT owners, a Radeon 780M laptop on an older driver ([#2](https://github.com/candygoogy/atieclxx-fix/issues/2)), and a Ryzen 5 5600G on Adrenalin 24.3.1.
 
 What we know about why:
 
 - PCs that still have the three amdkmpfd files from an older driver don't loop. Updating over an old driver keeps them; a clean install or DDU removes them.
 - Some PCs with an empty `amdkmpfd` folder don't loop either. The likely reason is that an older driver already installed the filter driver there, so the utility has nothing left to install. That part isn't confirmed.
+- On a PC that has never looped, the copied `atieclxx.exe` doesn't exist at all: the folder holds only shader caches (`DxCache`, `DxcCache`). **Check**, run as administrator, shows that as `not applied (the utility has made no copy on this PC)`.
 
 **Check** prints an `amdkmpfd:` line (whether the driver is installed and how many of the three files are there). If you're not affected, that line is the most useful thing you can report.
 

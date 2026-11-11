@@ -125,11 +125,14 @@ Given the installer code above, the files most likely let the utility finish and
 
 **Not explained yet.** Some PCs have an empty `amdkmpfd` folder and no loop. The likely reason is that an older driver already installed the filter there, so the utility has nothing to do. The script's **Check** prints the driver and file state to help confirm that.
 
+On PCs that have never looped, the copy doesn't exist at all ([issue #2](https://github.com/candygoogy/atieclxx-fix/issues/2); u/thegreatsquare found only `DxCache` and `DxcCache` in the folder). Every pass of the loop creates the file if it's missing, so a missing copy means the loop has never run there.
+
 A related test: deleting the empty `C:\Program Files\AMD\amdkmpfd_in` folder doesn't help, because the utility recreates it within seconds.
 
 ## 6. Reboots and driver updates
 
 - **Who uses the copy:** no service, scheduled task, Run key or running process points to `...\systemprofile\AppData\Local\AMD\atieclxx.exe`. The service runs `atiesrxx.exe` from the DriverStore, and that starts `atieclxx.exe` from the DriverStore too. The utility's own strings suggest it keeps the copy for removing the filter driver later (section 5). The fix only denies write and delete access to it.
 - **Driver installs leave it alone:** the copy on the test PC was created on 29 Oct, and the current driver package was installed on 30 Oct (`setupapi.dev.log`, DriverStore folder date). The installer didn't delete or recreate it; the utility kept overwriting it in place.
+- **DDU:** Display Driver Uninstaller's AMD cleanup goes through each user's `AppData\Local\AMD` under `C:\Users`, and in the system profile it only clears `D3DSCache` (`GPUCleanup.vb`, WPF branch, read on 11 November 2026). It has no step for `systemprofile\AppData\Local\AMD`, so the copy and its block should survive a DDU reinstall. u/schnepy reported 0 B/s after DDU and a fresh 26.10.2 install, with the fix applied beforehand, which fits. Not tested on the test PC.
 - **One limit:** SYSTEM has full control of the parent folder, so it can still *delete* the copy and create a new one, which would carry normal permissions. Tested with a dummy file and a task running as SYSTEM. The current utility never deletes; it only overwrites, and that's what the block stops. If a future driver deletes the file first, the fix would be lost, and **Check** would show the writes again.
 - **Stale copy after an update:** the script compares the copy's SHA-256 with the running `atieclxx.exe`. When they differ, **Fix** lifts the block, lets the new driver refresh its copy, measures again, and blocks again only if the writes are back. Simulated by changing one byte of the copy: Fix refreshed it, measured 595 KB/s, blocked again, and ended at 0 B/s.
