@@ -123,6 +123,8 @@ So the utility reads where the files should be, starts building an install packa
 
 Given the installer code above, the files most likely let the utility finish and install the 26.3.1 filter driver. That install hasn't been watched on the test PC, which doesn't have the files.
 
+**Resizable BAR.** u/ViperIXI switched Resizable BAR on and off on an RX 7900 XTX (Adrenalin 26.10.2) and an RX 9070 XT (26.9.2 and 26.10.2): the writes stop with it off and return with it on. An RX 580 on 26.5.2 keeps writing with it off (u/DavidAstonish). The utility's strings never mention Resizable BAR. They do name other install conditions (`InstallPciF4MSIX`, `KMD_DoNotInstallPciF4PSP`, `Global\AMDPCIFNoInstall`), so if the link is real, the decision to install the filter probably comes from the kernel driver. That hasn't been checked, and it hasn't been tested on the test PC.
+
 **Not explained yet.** Some PCs have an empty `amdkmpfd` folder and no loop. The likely reason is that an older driver already installed the filter there, so the utility has nothing to do. The script's **Check** prints the driver and file state to help confirm that.
 
 On PCs that have never looped, the copy doesn't exist at all ([issue #2](https://github.com/candygoogy/atieclxx-fix/issues/2); u/thegreatsquare found only `DxCache` and `DxcCache` in the folder). Every pass of the loop creates the file if it's missing, so a missing copy means the loop has never run there.

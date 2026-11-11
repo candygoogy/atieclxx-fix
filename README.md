@@ -4,7 +4,7 @@ Stops the AMD Radeon driver from writing **40–55 GB a day** to your system SSD
 
 In November 2026, Radeon owners noticed `atieclxx.exe` (the "AMD External Events Utility" that ships with Adrenalin) writing to disk nonstop, even on an idle PC. AMD confirmed the bug and says the fix will come in Adrenalin 26.11.1. Until that release, the usual advice is to disable the service, which breaks FreeSync on some PCs.
 
-This repo finds what the utility is actually writing and blocks only that. Users have confirmed it on RX 6700 XT, RX 7900 XTX, RX 9070 and RX 9070 XT, on Windows 10 and 11.
+This repo finds what the utility is actually writing and blocks only that. Users have confirmed it on RX 580, RX 6700 XT, RX 7900 XTX, RX 9070 and RX 9070 XT, on Windows 10 and 11.
 
 ```
 Before:
@@ -107,14 +107,16 @@ You don't need to undo anything before updating. If you'd rather start clean, **
 - People using it report no stutters or driver timeouts.
 - **Don't remove the `amdkmpfd` driver by hand.** It's a boot filter on the PCI bus. Deleting it with `sc delete amdkmpfd` leaves Windows unable to boot (`INACCESSIBLE_BOOT_DEVICE`, confirmed by u/lt_catscratch, who had to use a restore point).
 
+**Turn off Resizable BAR.** u/ViperIXI tested it both ways on an RX 7900 XTX (Adrenalin 26.10.2) and an RX 9070 XT (26.9.2 and 26.10.2): with Resizable BAR (AMD calls it Smart Access Memory) off in the BIOS, the writes stop, and with it on they come back. On an RX 580 the writes continued with it off (u/DavidAstonish). It hasn't been tested on the test PC. The cost is whatever performance Resizable BAR gives you in games.
+
 **The same fix, found separately.** [Dauntless-One/amd-eeu-ssd-write-fix](https://github.com/Dauntless-One/amd-eeu-ssd-write-fix) uses the same permission block and was published a day before this repo. Either one does the job; you don't need both.
 
-| | This repo | amdkmpfd files | Disable service |
-|---|---|---|---|
-| Stops the writes | yes | yes | yes |
-| Service keeps running | yes | yes | no |
-| FreeSync keeps working | yes (measured) | no problems reported | not on every PC |
-| What it changes | one permission | adds 3 driver files, which the utility then installs | disables a service |
+| | This repo | amdkmpfd files | Resizable BAR off | Disable service |
+|---|---|---|---|---|
+| Stops the writes | yes | yes | on the newer cards tested, not on an RX 580 | yes |
+| Service keeps running | yes | yes | yes | no |
+| FreeSync keeps working | yes (measured) | no problems reported | not reported | not on every PC |
+| What it changes | one permission | adds 3 driver files, which the utility then installs | a BIOS setting, at some cost in game performance | disables a service |
 
 ## Tested on
 
@@ -131,12 +133,13 @@ Reports from users (thanks!):
 | RX 7900 XTX | 26.9.2, 26.10.1, 26.10.2 | fixed, 54 GB/day → 0 B/s | u/schnepy and a friend, u/Electrical-Bobcat435 |
 | RX 7600 | latest | same loop seen, about 1.3 MB/s | u/skylog6593 |
 | RX 6700 XT | not given | fixed | u/enduser1980 |
+| RX 580 | 26.5.2 | fixed | u/DavidAstonish |
 
 Also reported fixed, card not given: u/wankerbanker85, u/Any_Juggernaut_112, u/FlurrySlurer, u/Romaryu.
 
 ## Who is affected
 
-The bug has been seen on RX 6700 XT, RX 7600, RX 7900 XTX, RX 9060 XT, RX 9070 and RX 9070 XT, with Adrenalin 26.9.2 to 26.10.2, on AMD and Intel motherboards.
+The bug has been seen on RX 580, RX 6700 XT, RX 7600, RX 7900 XTX, RX 9060 XT, RX 9070 and RX 9070 XT, with Adrenalin 26.5.2 (the RX 580) and 26.9.2 to 26.10.2, on AMD and Intel motherboards.
 
 Other people with the same cards and drivers see no writes at all. Reports of no loop so far: RX 6750 XT, RX 6800 XT, RX 6950 XT, some RX 7900 XTX, RX 9070 and RX 9070 XT owners, a Radeon 780M laptop on an older driver ([#2](https://github.com/candygoogy/atieclxx-fix/issues/2)), and a Ryzen 5 5600G on Adrenalin 24.3.1.
 
@@ -145,6 +148,7 @@ What we know about why:
 - PCs that still have the three amdkmpfd files from an older driver don't loop. Updating over an old driver keeps them; a clean install or DDU removes them.
 - Some PCs with an empty `amdkmpfd` folder don't loop either. The likely reason is that an older driver already installed the filter driver there, so the utility has nothing left to install. That part isn't confirmed.
 - On a PC that has never looped, the copied `atieclxx.exe` doesn't exist at all: the folder holds only shader caches (`DxCache`, `DxcCache`). **Check**, run as administrator, shows that as `not applied (the utility has made no copy on this PC)`.
+- Resizable BAR seems to matter on newer cards. With it off, the loop stops on an RX 7900 XTX and an RX 9070 XT (u/ViperIXI). An RX 580 loops with it off.
 
 **Check** prints an `amdkmpfd:` line (whether the driver is installed and how many of the three files are there). If you're not affected, that line is the most useful thing you can report.
 
