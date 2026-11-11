@@ -141,7 +141,7 @@ Also reported fixed, card not given: u/wankerbanker85, u/Any_Juggernaut_112, u/F
 
 The bug has been seen on RX 580, RX 6700 XT, RX 7600, RX 7900 XTX, RX 9060 XT, RX 9070 and RX 9070 XT, with Adrenalin 26.5.2 (the RX 580) and 26.9.2 to 26.10.2, on AMD and Intel motherboards.
 
-Other people with the same cards and drivers see no writes at all. Reports of no loop so far: RX 6750 XT, RX 6800 XT, RX 6950 XT, some RX 7900 XTX, RX 9070 and RX 9070 XT owners, a Radeon 780M laptop on an older driver ([#2](https://github.com/candygoogy/atieclxx-fix/issues/2)), and a Ryzen 5 5600G on Adrenalin 24.3.1.
+Other people with the same cards and drivers see no writes at all. Reports of no loop so far: RX 6750 XT, RX 6800 XT, RX 6950 XT, some RX 7900 XTX, RX 9070 and RX 9070 XT owners, a Radeon 780M laptop on an older driver ([#2](https://github.com/candygoogy/atieclxx-fix/issues/2)), another 780M laptop on Adrenalin 26.10.1 (u/xeizoo), and a Ryzen 5 5600G on Adrenalin 24.3.1.
 
 What we know about why:
 
