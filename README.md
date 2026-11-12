@@ -6,7 +6,7 @@ Stops the AMD Radeon driver from writing **40–55 GB a day** to your system SSD
 >
 > **If you used this fix:** update to 26.11.1, then run `Fix-SSD-Writes.cmd` → **U** (Undo), then **C** (Check). If Check says OK, you don't need the fix anymore.
 >
-> **Polaris and Vega cards (RX 400/500 series, Vega) are not fixed yet.** They use a separate driver branch (the 26.5.2 Polaris driver is on it), and the bug is confirmed there on an RX 560 and an RX 580. AMD's rep u/AMD_Vik says the filter driver works differently on these cards, so the fix "may take us a while to work in". Keep the fix applied, or apply it now.
+> **Polaris and Vega cards (RX 400/500 series, Vega) are not fixed yet.** They use a separate driver branch (the 26.5.2 Polaris driver is on it), and the bug is confirmed there on an RX 560 and an RX 580. AMD's rep u/AMD_Vik [says](https://www.reddit.com/r/Amd/comments/1xrpb1o/amd_confirms_radeon_driver_bug_causing_constant/19sfum5ywvcw0/) the filter driver works differently on these cards, so the fix "may take us a while to work in". Keep the fix applied, or apply it now.
 >
 > **RX 5000/6000:** not named in the 26.11.1 notes. After updating, run **C**; if it still says AFFECTED, apply the fix with **F**.
 
