@@ -129,6 +129,7 @@ Reports from users (thanks!):
 |---|---|---|---|
 | RX 9070 XT | 26.9.2, 26.10.1, 26.10.2 | fixed, on Windows 10 and 11 | u/Corvius, u/Maplane, u/Poquito-Mal, u/manolid, u/Thankyoumr |
 | RX 9070 | 26.10.2 | fixed, 617 KB/s → 0 B/s, on an Intel B660 motherboard | KiKiHUN1 ([#1](https://github.com/candygoogy/atieclxx-fix/issues/1)) |
+| RX 9070 | 26.10.2 (driver only, with RadeonTuner) | fixed, about 0.8 MB/s → 0, on a B550 motherboard | VACekToxic ([#6](https://github.com/candygoogy/atieclxx-fix/issues/6)) |
 | RX 9060 XT | 26.10.1, 26.10.2 | fixed, 662 KB/s → 0 B/s, on Windows 26H2, and still fixed after DDU and a clean reinstall | SkittlezAU ([#5](https://github.com/candygoogy/atieclxx-fix/issues/5)); loop also seen by u/Halicos93 |
 | RX 7900 XTX | 26.9.2, 26.10.1, 26.10.2 | fixed, 54 GB/day → 0 B/s | u/schnepy and a friend, u/Electrical-Bobcat435 |
 | RX 7800 XT | not given | fixed | u/Antique-Editor-9001 |
@@ -146,6 +147,7 @@ Other people with the same cards and drivers see no writes at all. Reports of no
 
 What we know about why:
 
+- Installing only the driver, without AMD Software, doesn't avoid it: the utility comes with the driver itself ([#6](https://github.com/candygoogy/atieclxx-fix/issues/6)).
 - PCs that still have the three amdkmpfd files from an older driver don't loop. Updating over an old driver keeps them; a clean install or DDU removes them.
 - Some PCs with an empty `amdkmpfd` folder don't loop either. It isn't because the filter driver is already installed: an RX 6600 on Adrenalin 26.10.1 with no filter driver and none of the files doesn't loop ([#3](https://github.com/candygoogy/atieclxx-fix/issues/3)). The reverse doesn't hold either: the RX 9070 XT on 26.5.1 above loops with the filter driver installed (and none of the files). What decides it is still unknown.
 - On a PC that has never looped, the copied `atieclxx.exe` doesn't exist at all: the folder holds only shader caches (`DxCache`, `DxcCache`). **Check**, run as administrator, shows that as `not applied (the utility has made no copy on this PC)`.
