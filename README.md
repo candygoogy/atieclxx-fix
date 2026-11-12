@@ -99,7 +99,7 @@ You don't need to undo anything before updating. If you'd rather start clean, **
 
 ## Other workarounds
 
-**Disable the service.** Set "AMD External Events Utility" to Disabled in `services.msc`. That stops the writes, but it can break FreeSync. [Dauntless-One measured it](https://github.com/Dauntless-One/amd-eeu-ssd-write-fix) with PresentMon: with the service disabled, VRR stopped working; with the service running and the same permission fix as this repo, VRR kept working. If you don't use FreeSync or Adrenalin hotkeys, disabling the service is fine.
+**Disable the service.** Set "AMD External Events Utility" to Disabled in `services.msc`. That stops the writes, but it can break FreeSync. [Dauntless-One measured it](https://github.com/Dauntless-One/amd-eeu-ssd-write-fix) with PresentMon: with the service disabled, VRR stopped working; with the service running and the same permission fix as this repo, VRR kept working. If you don't use FreeSync or Adrenalin hotkeys, disabling the service is fine. FSR 4 keeps working with it disabled (u/Erihknull).
 
 **Put the amdkmpfd files back.** The install the utility keeps retrying needs three files that Adrenalin 26.3.1 and older put in `C:\Windows\System32\AMD\amdkmpfd\`: `amdkmpfd.ctz`, `amdkmpfd.itz` and `amdkmpfd.stz` (names via u/BitRunner64). Copying them back from the 26.3.1 package stops the writes; u/lt_catscratch [tested it both ways](https://www.reddit.com/r/AMDHelp/s/Bchh9rfWuv). Steps and discussion are in [this r/buildapc thread](https://www.reddit.com/r/buildapc/s/mkT8v7ktK6).
 
@@ -135,7 +135,7 @@ Reports from users (thanks!):
 | RX 6700 XT | not given | fixed | u/enduser1980 |
 | RX 580 | 26.5.2 | fixed | u/DavidAstonish |
 
-Also reported fixed, card not given: u/wankerbanker85, u/Any_Juggernaut_112, u/FlurrySlurer, u/Romaryu.
+Also reported fixed, card not given: u/wankerbanker85, u/Any_Juggernaut_112, u/FlurrySlurer, u/Romaryu, u/Careful_Climate1589, u/John-333.
 
 ## Who is affected
 
