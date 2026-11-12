@@ -107,9 +107,9 @@ You don't need to undo anything before updating. If you'd rather start clean, **
 - People using it report no stutters or driver timeouts.
 - **Don't remove the `amdkmpfd` driver by hand.** It's a boot filter on the PCI bus. Deleting it with `sc delete amdkmpfd` leaves Windows unable to boot (`INACCESSIBLE_BOOT_DEVICE`, confirmed by u/lt_catscratch, who had to use a restore point).
 
-**Turn off Resizable BAR.** u/ViperIXI tested it both ways on an RX 7900 XTX (Adrenalin 26.10.2) and an RX 9070 XT (26.9.2 and 26.10.2): with Resizable BAR (AMD calls it Smart Access Memory) off in the BIOS, the writes stop, and with it on they come back. On an RX 580 the writes continued with it off (u/DavidAstonish). It hasn't been tested on the test PC. The cost is whatever performance Resizable BAR gives you in games.
+**Turn off Resizable BAR.** u/ViperIXI tested it both ways on an RX 7900 XTX (Adrenalin 26.10.2) and an RX 9070 XT (26.9.2 and 26.10.2): with Resizable BAR (AMD calls it Smart Access Memory) off in the BIOS, the writes stop, and with it on they come back. On an RX 580 the writes continued with it off (u/DavidAstonish). It hasn't been tested on the test PC. necanditool's README describes amdkmpfd as the Smart Access Memory filter driver, which would explain why the setting matters. The cost is whatever performance Resizable BAR gives you in games.
 
-**The same fix, found separately.** [Dauntless-One/amd-eeu-ssd-write-fix](https://github.com/Dauntless-One/amd-eeu-ssd-write-fix) uses the same permission block and was published a day before this repo. Either one does the job; you don't need both.
+**The same fix, found separately.** Two other projects found the same permission block on 9 November, a day before this repo. [necanditool/Radeon-atieclxx-SSD-Fix](https://github.com/necanditool/Radeon-atieclxx-SSD-Fix) was first. It has a German interface and adds a scheduled task that keeps the block in place after driver updates, and its README already linked the loop to the amdkmpfd files. [Dauntless-One/amd-eeu-ssd-write-fix](https://github.com/Dauntless-One/amd-eeu-ssd-write-fix) followed a few hours later. Any of them does the job; you only need one.
 
 | | This repo | amdkmpfd files | Resizable BAR off | Disable service |
 |---|---|---|---|---|
