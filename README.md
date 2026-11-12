@@ -2,7 +2,13 @@
 
 Stops the AMD Radeon driver from writing **40–55 GB a day** to your system SSD, and keeps the AMD service running.
 
-In November 2026, Radeon owners noticed `atieclxx.exe` (the "AMD External Events Utility" that ships with Adrenalin) writing to disk nonstop, even on an idle PC. AMD confirmed the bug and says the fix will come in Adrenalin 26.11.1. Until that release, the usual advice is to disable the service, which breaks FreeSync on some PCs.
+> **Update, 12 November 2026: AMD fixed this in Adrenalin 26.11.1.** Its release notes list excessive writes to the system drive while idle as fixed on RX 7000 series and newer. On the test PC (RX 9070 XT, 26.11.1 installed over 26.10.2), the utility writes 0 B/s with the block removed. 26.11.1 doesn't bring back the missing amdkmpfd files: the driver no longer sets up that install at all.
+>
+> **If you used this fix:** update to 26.11.1, then run `Fix-SSD-Writes.cmd` → **U** (Undo), then **C** (Check). If Check says OK, you don't need the fix anymore.
+>
+> **RX 6000 and older cards** (including the RX 580) had the bug too, but AMD's notes only mention RX 7000 and newer. Run **C** after updating; if it still says AFFECTED, apply the fix again with **F**.
+
+In November 2026, Radeon owners noticed `atieclxx.exe` (the "AMD External Events Utility" that ships with Adrenalin) writing to disk nonstop, even on an idle PC. AMD confirmed the bug and fixed it in Adrenalin 26.11.1 (see above). Before that, the usual advice was to disable the service, which breaks FreeSync on some PCs.
 
 This repo finds what the utility is actually writing and blocks only that. Users have confirmed it on RX 580, RX 6700 XT, RX 7800 XT, RX 7900 XTX, RX 9060 XT, RX 9070 and RX 9070 XT, on Windows 10 and 11.
 
