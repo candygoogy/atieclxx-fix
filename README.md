@@ -139,14 +139,14 @@ Also reported fixed, card not given: u/wankerbanker85, u/Any_Juggernaut_112, u/F
 
 ## Who is affected
 
-The bug has been seen on RX 580, RX 6700 XT, RX 7600, RX 7900 XTX, RX 9060 XT, RX 9070 and RX 9070 XT, with Adrenalin 26.5.2 (the RX 580) and 26.9.2 to 26.10.2, on AMD and Intel motherboards.
+The bug has been seen on RX 580, RX 6700 XT, RX 7600, RX 7900 XTX, RX 9060 XT, RX 9070 and RX 9070 XT, with Adrenalin 26.5.1 and 26.5.2, and 26.9.2 to 26.10.2, on AMD and Intel motherboards. 26.3.1 and older still shipped the amdkmpfd files, so the change came between 26.3.1 and 26.5.1. The oldest report is an RX 9070 XT on 26.5.1 that had written 890 GB in 256 hours (u/dangderr).
 
 Other people with the same cards and drivers see no writes at all. Reports of no loop so far: RX 6750 XT, RX 6800 XT, RX 6950 XT, some RX 7900 XTX, RX 9070 and RX 9070 XT owners, a Radeon 780M laptop on an older driver ([#2](https://github.com/candygoogy/atieclxx-fix/issues/2)), another 780M laptop on Adrenalin 26.10.1 (u/xeizoo), and a Ryzen 5 5600G on Adrenalin 24.3.1.
 
 What we know about why:
 
 - PCs that still have the three amdkmpfd files from an older driver don't loop. Updating over an old driver keeps them; a clean install or DDU removes them.
-- Some PCs with an empty `amdkmpfd` folder don't loop either. It isn't because the filter driver is already installed: an RX 6600 on Adrenalin 26.10.1 with no filter driver and none of the files doesn't loop ([#3](https://github.com/candygoogy/atieclxx-fix/issues/3)). What decides it is still unknown.
+- Some PCs with an empty `amdkmpfd` folder don't loop either. It isn't because the filter driver is already installed: an RX 6600 on Adrenalin 26.10.1 with no filter driver and none of the files doesn't loop ([#3](https://github.com/candygoogy/atieclxx-fix/issues/3)). The reverse doesn't hold either: the RX 9070 XT on 26.5.1 above loops with the filter driver installed (and none of the files). What decides it is still unknown.
 - On a PC that has never looped, the copied `atieclxx.exe` doesn't exist at all: the folder holds only shader caches (`DxCache`, `DxcCache`). **Check**, run as administrator, shows that as `not applied (the utility has made no copy on this PC)`.
 - Resizable BAR seems to matter on newer cards. With it off, the loop stops on an RX 7900 XTX and an RX 9070 XT (u/ViperIXI). An RX 580 loops with it off, and the RX 6600 above has it on and doesn't loop, so it isn't the whole answer.
 
