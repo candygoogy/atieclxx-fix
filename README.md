@@ -4,7 +4,7 @@ Stops the AMD Radeon driver from writing **40–55 GB a day** to your system SSD
 
 In November 2026, Radeon owners noticed `atieclxx.exe` (the "AMD External Events Utility" that ships with Adrenalin) writing to disk nonstop, even on an idle PC. AMD confirmed the bug and says the fix will come in Adrenalin 26.11.1. Until that release, the usual advice is to disable the service, which breaks FreeSync on some PCs.
 
-This repo finds what the utility is actually writing and blocks only that. Users have confirmed it on RX 580, RX 6700 XT, RX 7900 XTX, RX 9070 and RX 9070 XT, on Windows 10 and 11.
+This repo finds what the utility is actually writing and blocks only that. Users have confirmed it on RX 580, RX 6700 XT, RX 7900 XTX, RX 9060 XT, RX 9070 and RX 9070 XT, on Windows 10 and 11.
 
 ```
 Before:
@@ -129,7 +129,7 @@ Reports from users (thanks!):
 |---|---|---|---|
 | RX 9070 XT | 26.9.2, 26.10.1, 26.10.2 | fixed, on Windows 10 and 11 | u/Corvius, u/Maplane, u/Poquito-Mal, u/manolid, u/Thankyoumr |
 | RX 9070 | 26.10.2 | fixed, 617 KB/s → 0 B/s, on an Intel B660 motherboard | KiKiHUN1 ([#1](https://github.com/candygoogy/atieclxx-fix/issues/1)) |
-| RX 9060 XT | not given | same loop seen | u/Halicos93 |
+| RX 9060 XT | 26.10.1, 26.10.2 | fixed, 662 KB/s → 0 B/s, on Windows 26H2, and still fixed after DDU and a clean reinstall | SkittlezAU ([#5](https://github.com/candygoogy/atieclxx-fix/issues/5)); loop also seen by u/Halicos93 |
 | RX 7900 XTX | 26.9.2, 26.10.1, 26.10.2 | fixed, 54 GB/day → 0 B/s | u/schnepy and a friend, u/Electrical-Bobcat435 |
 | RX 7600 | latest | same loop seen, about 1.3 MB/s | u/skylog6593 |
 | RX 6700 XT | not given | fixed | u/enduser1980 |
@@ -146,9 +146,9 @@ Other people with the same cards and drivers see no writes at all. Reports of no
 What we know about why:
 
 - PCs that still have the three amdkmpfd files from an older driver don't loop. Updating over an old driver keeps them; a clean install or DDU removes them.
-- Some PCs with an empty `amdkmpfd` folder don't loop either. The likely reason is that an older driver already installed the filter driver there, so the utility has nothing left to install. That part isn't confirmed.
+- Some PCs with an empty `amdkmpfd` folder don't loop either. It isn't because the filter driver is already installed: an RX 6600 on Adrenalin 26.10.1 with no filter driver and none of the files doesn't loop ([#3](https://github.com/candygoogy/atieclxx-fix/issues/3)). What decides it is still unknown.
 - On a PC that has never looped, the copied `atieclxx.exe` doesn't exist at all: the folder holds only shader caches (`DxCache`, `DxcCache`). **Check**, run as administrator, shows that as `not applied (the utility has made no copy on this PC)`.
-- Resizable BAR seems to matter on newer cards. With it off, the loop stops on an RX 7900 XTX and an RX 9070 XT (u/ViperIXI). An RX 580 loops with it off.
+- Resizable BAR seems to matter on newer cards. With it off, the loop stops on an RX 7900 XTX and an RX 9070 XT (u/ViperIXI). An RX 580 loops with it off, and the RX 6600 above has it on and doesn't loop, so it isn't the whole answer.
 
 **Check** prints an `amdkmpfd:` line (whether the driver is installed and how many of the three files are there). If you're not affected, that line is the most useful thing you can report.
 
