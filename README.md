@@ -140,7 +140,7 @@ Reports from users (thanks!):
 | RX 9070 | 26.10.2 (driver only, with RadeonTuner) | fixed, about 0.8 MB/s → 0, on a B550 motherboard | VACekToxic ([#6](https://github.com/candygoogy/atieclxx-fix/issues/6)) |
 | RX 9060 XT | 26.10.1, 26.10.2 | fixed, 662 KB/s → 0 B/s, on Windows 26H2, and still fixed after DDU and a clean reinstall | SkittlezAU ([#5](https://github.com/candygoogy/atieclxx-fix/issues/5)); loop also seen by u/Halicos93 |
 | RX 7900 XTX | 26.9.2, 26.10.1, 26.10.2 | fixed, 54 GB/day → 0 B/s | u/schnepy and a friend, u/Electrical-Bobcat435 |
-| RX 7800 XT | not given | fixed | u/Antique-Editor-9001 |
+| RX 7800 XT | 26.10.1 | fixed | u/Antique-Editor-9001 |
 | RX 7600 | latest | same loop seen, about 1.3 MB/s | u/skylog6593 |
 | RX 6700 XT | not given | fixed | u/enduser1980 |
 | RX 580 | 26.5.2 | fixed | u/DavidAstonish |
