@@ -4,7 +4,7 @@ Stops the AMD Radeon driver from writing **40–55 GB a day** to your system SSD
 
 In November 2026, Radeon owners noticed `atieclxx.exe` (the "AMD External Events Utility" that ships with Adrenalin) writing to disk nonstop, even on an idle PC. AMD confirmed the bug and says the fix will come in Adrenalin 26.11.1. Until that release, the usual advice is to disable the service, which breaks FreeSync on some PCs.
 
-This repo finds what the utility is actually writing and blocks only that. Users have confirmed it on RX 580, RX 6700 XT, RX 7900 XTX, RX 9060 XT, RX 9070 and RX 9070 XT, on Windows 10 and 11.
+This repo finds what the utility is actually writing and blocks only that. Users have confirmed it on RX 580, RX 6700 XT, RX 7800 XT, RX 7900 XTX, RX 9060 XT, RX 9070 and RX 9070 XT, on Windows 10 and 11.
 
 ```
 Before:
@@ -131,6 +131,7 @@ Reports from users (thanks!):
 | RX 9070 | 26.10.2 | fixed, 617 KB/s → 0 B/s, on an Intel B660 motherboard | KiKiHUN1 ([#1](https://github.com/candygoogy/atieclxx-fix/issues/1)) |
 | RX 9060 XT | 26.10.1, 26.10.2 | fixed, 662 KB/s → 0 B/s, on Windows 26H2, and still fixed after DDU and a clean reinstall | SkittlezAU ([#5](https://github.com/candygoogy/atieclxx-fix/issues/5)); loop also seen by u/Halicos93 |
 | RX 7900 XTX | 26.9.2, 26.10.1, 26.10.2 | fixed, 54 GB/day → 0 B/s | u/schnepy and a friend, u/Electrical-Bobcat435 |
+| RX 7800 XT | not given | fixed | u/Antique-Editor-9001 |
 | RX 7600 | latest | same loop seen, about 1.3 MB/s | u/skylog6593 |
 | RX 6700 XT | not given | fixed | u/enduser1980 |
 | RX 580 | 26.5.2 | fixed | u/DavidAstonish |
@@ -139,7 +140,7 @@ Also reported fixed, card not given: u/wankerbanker85, u/Any_Juggernaut_112, u/F
 
 ## Who is affected
 
-The bug has been seen on RX 580, RX 6700 XT, RX 7600, RX 7900 XTX, RX 9060 XT, RX 9070 and RX 9070 XT, with Adrenalin 26.5.1 and 26.5.2, and 26.9.2 to 26.10.2, on AMD and Intel motherboards. 26.3.1 and older still shipped the amdkmpfd files, so the change came between 26.3.1 and 26.5.1. The oldest report is an RX 9070 XT on 26.5.1 that had written 890 GB in 256 hours (u/dangderr).
+The bug has been seen on RX 580, RX 6700 XT, RX 7600, RX 7800 XT, RX 7900 XTX, RX 9060 XT, RX 9070 and RX 9070 XT, with Adrenalin 26.5.1 and 26.5.2, and 26.9.2 to 26.10.2, on AMD and Intel motherboards. 26.3.1 and older still shipped the amdkmpfd files, so the change came between 26.3.1 and 26.5.1. The oldest report is an RX 9070 XT on 26.5.1 that had written 890 GB in 256 hours (u/dangderr).
 
 Other people with the same cards and drivers see no writes at all. Reports of no loop so far: RX 6750 XT, RX 6800 XT, RX 6950 XT, some RX 7900 XTX, RX 9070 and RX 9070 XT owners, a Radeon 780M laptop on an older driver ([#2](https://github.com/candygoogy/atieclxx-fix/issues/2)), another 780M laptop on Adrenalin 26.10.1 (u/xeizoo), and a Ryzen 5 5600G on Adrenalin 24.3.1.
 
