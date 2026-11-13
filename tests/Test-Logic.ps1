@@ -112,3 +112,5 @@ Remove-Item -LiteralPath $lone -Recurse -Force -ErrorAction SilentlyContinue
 Write-Host ''
 if ($script:failures) { Write-Host "$($script:failures) test(s) failed" -ForegroundColor Red; exit 1 }
 Write-Host 'All tests passed' -ForegroundColor Green
+# The launcher test above leaves exit code 1 behind on purpose; report success explicitly.
+exit 0
