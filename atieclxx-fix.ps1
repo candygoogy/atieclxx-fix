@@ -34,7 +34,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$Version   = '1.1.1'
+$Version   = '1.1.2'
 $Copy      = Join-Path $env:SystemRoot 'System32\config\systemprofile\AppData\Local\AMD\atieclxx.exe'
 $SystemSid = 'S-1-5-18'
 # Normal background writes from this utility are close to zero. The bug writes ~650 KB/s.
@@ -44,6 +44,9 @@ $AffectedBytesPerSec = 50KB
 # built into Ryzen CPUs aren't matched: which driver branch covers them isn't known, and
 # the general advice fits them either way.
 $GcnPattern = '\bRX\s*(4[6-9]0|5[0-9]0|640)X?\b|\bRX\s+Vega\b|Radeon\s+VII\b'
+# RX 5000 and RX 6000 cards (RX 5300-5700, RX 6300-6950, desktop and laptop): not named in
+# AMD's 26.11.1 release notes.
+$Rdna12Pattern = '\bRX\s*(5[3-7]|6[3-9])[05]0(?!\d)'
 
 function Get-AmdGpus {
     # Every AMD GPU: PCs with a Ryzen iGPU have two, and the first one isn't always the card.
@@ -57,6 +60,11 @@ function Get-GcnState {
     if ($gcn -eq 0) { return 'none' }
     if ($gcn -eq $gpus.Count) { return 'all' }
     return 'some'
+}
+
+function Test-Rdna12Card {
+    foreach ($g in Get-AmdGpus) { if ($g.Name -match $Rdna12Pattern) { return $true } }
+    return $false
 }
 
 function Test-Admin {
@@ -182,8 +190,13 @@ function Invoke-Check {
                 Write-Host '  Radeon. A driver update may not be enough here, so run the fix (as administrator).'
             }
             default {
-                Write-Host '  AMD fixed this in Adrenalin 26.11.1 for RX 7000 and newer. Update the driver,'
-                Write-Host '  or run the fix (as administrator) to stop it now.'
+                if (Test-Rdna12Card) {
+                    Write-Host '  AMD''s fix in Adrenalin 26.11.1 names RX 7000 and newer, not your card.'
+                    Write-Host '  Run the fix (as administrator) to stop it.'
+                } else {
+                    Write-Host '  AMD fixed this in Adrenalin 26.11.1 for RX 7000 and newer. Update the driver,'
+                    Write-Host '  or run the fix (as administrator) to stop it now.'
+                }
             }
         }
     } else {

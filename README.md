@@ -14,7 +14,7 @@ AMD fixed the bug in **Adrenalin 26.11.1** (12 November 2026) for RX 7000 and ne
 | **RX 5000, RX 6000** | Not named in AMD's release notes. Update, then press **C**. If it says AFFECTED, press **F**. |
 | **RX 400/500 series, Vega** | **Not fixed by AMD yet. Use this fix ([steps below](#fix-it)).** |
 
-Since version 1.1.0, **Check** also says which of these applies to your PC.
+If **Check** finds the bug, it also says what to do for your card.
 
 - **Polaris and Vega:** they use a separate driver branch (the 26.5.2 Polaris driver is on it), and the bug is confirmed there on an RX 560 and an RX 580. AMD's rep u/AMD_Vik [says](https://www.reddit.com/r/Amd/comments/1xrpb1o/amd_confirms_radeon_driver_bug_causing_constant/19sfum5ywvcw0/) the filter driver works differently on these cards, so the fix "may take us a while to work in".
 - **The test PC on 26.11.1** (RX 9070 XT, installed over 26.10.2): with the block removed, the utility wrote nothing new in 13 hours. 26.11.1 doesn't bring back the missing amdkmpfd files; the driver no longer starts that install at all ([details](docs/how-it-works.md#7-amds-fix-in-adrenalin-26111)).
@@ -124,7 +124,7 @@ You don't need to undo anything before updating. If you'd rather start clean, **
 - People using it report no stutters or driver timeouts.
 - **Don't remove the `amdkmpfd` driver by hand.** It's a boot filter on the PCI bus. Deleting it with `sc delete amdkmpfd` leaves Windows unable to boot (`INACCESSIBLE_BOOT_DEVICE`, confirmed by u/lt_catscratch, who had to use a restore point).
 
-**Turn off Resizable BAR.** u/ViperIXI tested it both ways on an RX 7900 XTX (Adrenalin 26.10.2) and an RX 9070 XT (26.9.2 and 26.10.2): with Resizable BAR (AMD calls it Smart Access Memory) off in the BIOS, the writes stop, and with it on they come back. On an RX 580 the writes continued with it off (u/DavidAstonish). AMD's rep u/AMD_Vik also said in that r/buildapc thread that disabling it works around the bug. It hasn't been tested on the test PC. necanditool's README describes amdkmpfd as the Smart Access Memory filter driver, which would explain why the setting matters. The cost is whatever performance Resizable BAR gives you in games.
+**Turn off Resizable BAR.** u/ViperIXI tested it both ways on an RX 7900 XTX (Adrenalin 26.10.2) and an RX 9070 XT (26.9.2 and 26.10.2): with Resizable BAR (AMD calls it Smart Access Memory) off in the BIOS, the writes stop, and with it on they come back. On an RX 580 the writes continued with it off (u/DavidAstonish). AMD's rep u/AMD_Vik wrote in that r/buildapc thread that "apparently disabling ReBAR will also work around that behaviour". It hasn't been tested on the test PC. necanditool's README describes amdkmpfd as the Smart Access Memory filter driver, which would explain why the setting matters. The cost is whatever performance Resizable BAR gives you in games.
 
 **The same fix, found separately.** Two other projects found the same permission block on 9 November, a day before this repo. [necanditool/Radeon-atieclxx-SSD-Fix](https://github.com/necanditool/Radeon-atieclxx-SSD-Fix) was first. It has a German interface and adds a scheduled task that keeps the block in place after driver updates, and its README already linked the loop to the amdkmpfd files. [Dauntless-One/amd-eeu-ssd-write-fix](https://github.com/Dauntless-One/amd-eeu-ssd-write-fix) followed a few hours later. Any of them does the job; you only need one.
 

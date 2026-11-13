@@ -55,6 +55,12 @@ New-State @('AMD Radeon(TM) Graphics', 'Radeon RX 580 Series') @() $false $false
 Expect 'Ryzen iGPU + RX 580' (Get-GcnState) @('some')
 New-State @() @() $false $false
 Expect 'no AMD GPU found' (Get-GcnState) @('none')
+foreach ($n in 'AMD Radeon RX 5700 XT','AMD Radeon RX 5500 XT','AMD Radeon RX 6600','AMD Radeon RX 6950 XT','AMD Radeon RX 6800M','AMD Radeon RX 6650 XT') {
+    New-State $n @() $false $false; Expect "RX 5000/6000 card: $n" ([string](Test-Rdna12Card)) @('True')
+}
+foreach ($n in 'Radeon RX 580 Series','AMD Radeon RX 7600','AMD Radeon RX 7800 XT','AMD Radeon RX 9070 XT','AMD Radeon(TM) Graphics') {
+    New-State $n @() $false $false; Expect "not an RX 5000/6000 card: $n" ([string](Test-Rdna12Card)) @('False')
+}
 
 # Check
 New-State $Polaris @($Bug) $false $false
@@ -62,6 +68,9 @@ Expect 'Check, Polaris, affected' (Run { Invoke-Check }) @('AFFECTED', 'not fixe
 
 New-State $Rdna4 @($Bug) $false $false
 Expect 'Check, RX 9070 XT, affected' (Run { Invoke-Check }) @('AFFECTED', 'fixed this in Adrenalin 26.11.1') @('Polaris')
+
+New-State 'AMD Radeon RX 6600' @($Bug) $false $false
+Expect 'Check, RX 6600, affected' (Run { Invoke-Check }) @('AFFECTED', 'not your card', 'Run the fix') @('Update the driver', 'Polaris')
 
 New-State @('AMD Radeon(TM) Vega 11 Graphics', $Rdna4) @($Bug) $false $false
 Expect 'Check, Vega iGPU + RX 9070 XT, affected' (Run { Invoke-Check }) @('AFFECTED', 'fixed this in Adrenalin 26.11.1') @('Polaris')
