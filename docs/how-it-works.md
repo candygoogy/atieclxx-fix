@@ -115,7 +115,7 @@ So the utility reads where the files should be, starts building an install packa
 
 **The test PC has no amdkmpfd driver at all.** There's no `amdkmpfd` service and no `amdkmpfd.sys`, with AMD Chipset Software 8.09.28.1124 installed (X870E). The bug also shows up on an Intel B660 motherboard ([issue #1](https://github.com/candygoogy/atieclxx-fix/issues/1)), so it doesn't depend on the AMD chipset driver.
 
-**What putting the files back does.** Findings from u/lt_catscratch (7900 XTX, Adrenalin 26.9.2) in [the Reddit thread](https://www.reddit.com/r/AMDHelp/s/Bchh9rfWuv):
+**What putting the files back does.** Findings from u/lt_catscratch (7900 XTX, Adrenalin 26.9.2) in [the Reddit thread](https://www.reddit.com/r/AMDHelp/comments/1xsx6t3/atieclxxexe_copies_its_own_exe_to_disk_every/):
 
 - With the three files from the 26.3.1 package copied into that folder, the writes stop.
 - With the files removed again, the writes come back.
