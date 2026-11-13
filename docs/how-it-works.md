@@ -1,6 +1,6 @@
 # How it works
 
-Findings from one PC (Windows 11, RX 9070 XT, driver 32.0.32015.12012), 10 November 2026.
+Findings from one PC (Windows 11, RX 9070 XT). Sections 1 to 6 are from 10 and 11 November 2026 on driver 32.0.32015.12012 (Adrenalin 26.10.2), with reports from other users added since. Section 7 covers AMD's fix, from 12 and 13 November.
 
 ## 1. The utility's write counter
 
@@ -150,4 +150,6 @@ What changed, checked on the test PC:
 - **The install is no longer started.** After installing 26.11.1 over 26.10.2, `C:\Windows\System32\AMD\amdkmpfd` no longer exists and the amdkmpfd service isn't installed. With the block removed, `atieclxx.exe` wrote 0 B/s in two measurements (30 s and 15 s); its total stayed at 2.5 MB, all written when it started, and was still 2.5 MB 13 hours later.
 - **Where the fix was made.** AMD's u/AMD_Vik confirmed [in r/buildapc](https://www.reddit.com/r/buildapc/comments/1x4153i/comment/19rh3g0s9wyit/) that the disk write issue would be fixed in this release, and the same thread says it "was fixed recently by a friend in kmd", the kernel-mode driver. That fits the above: the utility is nearly unchanged, and the driver no longer sets up the filter install, so there's nothing for the utility to retry.
 
-Not tested yet: a clean install of 26.11.1, and cards older than RX 7000, which had the bug (RX 580, RX 6700 XT) but aren't named in the release notes.
+**Cards the fix doesn't cover.** Polaris and Vega cards use a separate driver branch and still have the bug (confirmed on an RX 560 and an RX 580, both on the 26.5.2 Polaris driver). u/AMD_Vik [says](https://www.reddit.com/r/Amd/comments/1xrpb1o/amd_confirms_radeon_driver_bug_causing_constant/19sfum5ywvcw0/) the filter driver has different responsibilities on those cards, so the change made for the newer branches can't simply be carried over, and it "may take us a while to work in".
+
+Not tested yet: a clean install of 26.11.1, and RX 5000 and RX 6000 cards, which had the bug (RX 6700 XT) but aren't named in the release notes.

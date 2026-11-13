@@ -34,23 +34,29 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$Version   = '1.1.0'
+$Version   = '1.1.1'
 $Copy      = Join-Path $env:SystemRoot 'System32\config\systemprofile\AppData\Local\AMD\atieclxx.exe'
 $SystemSid = 'S-1-5-18'
 # Normal background writes from this utility are close to zero. The bug writes ~650 KB/s.
 $AffectedBytesPerSec = 50KB
-# Polaris and Vega (GCN) cards: RX 460-590, RX 640, Vega, Radeon VII. AMD's 26.11.1 fix
-# doesn't cover them yet. The word boundaries keep RDNA's RX 5500-5700 out.
-$GcnPattern = '\bRX\s*(4[6-9]0|5[0-9]0|640)X?\b|\bVega\b|Radeon\s+VII\b'
+# Polaris and Vega (GCN) cards: RX 460-590, RX 640, RX Vega, Radeon VII. AMD's 26.11.1 fix
+# doesn't cover them yet. The word boundaries keep RDNA's RX 5500-5700 out. Vega graphics
+# built into Ryzen CPUs aren't matched: which driver branch covers them isn't known, and
+# the general advice fits them either way.
+$GcnPattern = '\bRX\s*(4[6-9]0|5[0-9]0|640)X?\b|\bRX\s+Vega\b|Radeon\s+VII\b'
 
 function Get-AmdGpus {
     # Every AMD GPU: PCs with a Ryzen iGPU have two, and the first one isn't always the card.
     @(Get-CimInstance Win32_VideoController | Where-Object { $_.Name -match 'Radeon|AMD' })
 }
 
-function Test-GcnCard {
-    foreach ($g in Get-AmdGpus) { if ($g.Name -match $GcnPattern) { return $true } }
-    return $false
+# How many of this PC's AMD GPUs are Polaris or Vega cards: 'all', 'some' or 'none'.
+function Get-GcnState {
+    $gpus = @(Get-AmdGpus)
+    $gcn  = @($gpus | Where-Object { $_.Name -match $GcnPattern }).Count
+    if ($gcn -eq 0) { return 'none' }
+    if ($gcn -eq $gpus.Count) { return 'all' }
+    return 'some'
 }
 
 function Test-Admin {
@@ -166,12 +172,19 @@ function Invoke-Check {
     Write-Host ''
     if ($rate -ge $AffectedBytesPerSec) {
         Write-Host '  AFFECTED: the utility is constantly writing to your system drive.' -ForegroundColor Red
-        if (Test-GcnCard) {
-            Write-Host '  AMD has not fixed this for Polaris and Vega cards yet.'
-            Write-Host '  Run the fix (as administrator) to stop it.'
-        } else {
-            Write-Host '  AMD fixed this in Adrenalin 26.11.1 for RX 7000 and newer. Update the driver,'
-            Write-Host '  or run the fix (as administrator) to stop it now.'
+        switch (Get-GcnState) {
+            'all' {
+                Write-Host '  AMD has not fixed this for Polaris and Vega cards yet.'
+                Write-Host '  Run the fix (as administrator) to stop it.'
+            }
+            'some' {
+                Write-Host '  This PC has a Polaris or Vega card, which AMD has not fixed yet, and another'
+                Write-Host '  Radeon. A driver update may not be enough here, so run the fix (as administrator).'
+            }
+            default {
+                Write-Host '  AMD fixed this in Adrenalin 26.11.1 for RX 7000 and newer. Update the driver,'
+                Write-Host '  or run the fix (as administrator) to stop it now.'
+            }
         }
     } else {
         Write-Host '  OK: no constant writes from atieclxx.exe right now.' -ForegroundColor Green
@@ -281,5 +294,7 @@ try {
 } catch {
     Write-Host ''
     Write-Host ("  Error: {0}" -f $_.Exception.Message) -ForegroundColor Red
-    exit 1
+    # Run from a file, report the failure to the caller. Pasted into a console (the README's
+    # one-line Check), "exit" would close the window before the error can be read.
+    if ($PSCommandPath) { exit 1 }
 }

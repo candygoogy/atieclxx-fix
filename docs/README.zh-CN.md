@@ -10,13 +10,13 @@ AMD 已在 **Adrenalin 26.11.1**（2026 年 11 月 12 日）中为 RX 7000 及�
 
 | 你的显卡 | 怎么做 |
 |---|---|
-| **RX 7000、RX 9000** | 更新到 Adrenalin 26.11.1。如果之前用过这个修复，再运行一次，按 **U**（撤销），然后按 **C**（检查）。 |
+| **RX 7000、RX 9000** | 更新到 Adrenalin 26.11.1。如果之前用过这个修复，再运行一次并按 **F**：新驱动不再需要时，它会自动解除阻止。 |
 | **RX 5000、RX 6000** | AMD 的更新说明里没有提到。先更新，再按 **C**。如果显示 AFFECTED，按 **F**。 |
 | **RX 400/500 系列（如 RX 580）、Vega** | **AMD 还没有修复。请使用这个修复（见下方步骤）。** |
 
 ## 使用方法
 
-1. 下载 **[atieclxx-fix.zip](https://github.com/candygoogy/atieclxx-fix/releases/latest/download/atieclxx-fix.zip)** 并解压。
+1. 下载 **[atieclxx-fix.zip](https://github.com/candygoogy/atieclxx-fix/releases/latest/download/atieclxx-fix.zip)** 并解压（右键 → 全部解压缩）。直接在压缩包里运行是不行的。
 2. 双击 **`Fix-SSD-Writes.cmd`**，在管理员权限提示中点"是"。
 3. 按 **F**。
 

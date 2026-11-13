@@ -10,13 +10,13 @@ AMD corrigió el fallo en **Adrenalin 26.11.1** (12 de noviembre de 2026) para R
 
 | Tu tarjeta | Qué hacer |
 |---|---|
-| **RX 7000, RX 9000** | Actualiza a Adrenalin 26.11.1. Si aplicaste esta solución, ejecútala otra vez y pulsa **U** (deshacer) y luego **C** (comprobar). |
+| **RX 7000, RX 9000** | Actualiza a Adrenalin 26.11.1. Si aplicaste esta solución, ejecútala otra vez y pulsa **F**: quita el bloqueo cuando el driver nuevo ya no lo necesita. |
 | **RX 5000, RX 6000** | No aparecen en las notas de AMD. Actualiza y pulsa **C**. Si dice AFFECTED, pulsa **F**. |
 | **Serie RX 400/500 (como la RX 580), Vega** | **AMD todavía no lo ha corregido. Usa esta solución (pasos abajo).** |
 
 ## Cómo usarlo
 
-1. Descarga **[atieclxx-fix.zip](https://github.com/candygoogy/atieclxx-fix/releases/latest/download/atieclxx-fix.zip)** y descomprímelo.
+1. Descarga **[atieclxx-fix.zip](https://github.com/candygoogy/atieclxx-fix/releases/latest/download/atieclxx-fix.zip)** y descomprímelo (clic derecho → **Extraer todo**). Ejecutarlo desde dentro del zip no funciona.
 2. Haz doble clic en **`Fix-SSD-Writes.cmd`** y acepta el aviso de administrador.
 3. Pulsa **F**.
 

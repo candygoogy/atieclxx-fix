@@ -10,7 +10,7 @@ AMD fixed the bug in **Adrenalin 26.11.1** (12 November 2026) for RX 7000 and ne
 
 | Your card | What to do |
 |---|---|
-| **RX 7000, RX 9000** | Update to Adrenalin 26.11.1. If you applied this fix, run it once more and press **U** (Undo), then **C** (Check). |
+| **RX 7000, RX 9000** | Update to Adrenalin 26.11.1. If you applied this fix, run it once more and press **F**: it removes the block when the new driver no longer needs it. |
 | **RX 5000, RX 6000** | Not named in AMD's release notes. Update, then press **C**. If it says AFFECTED, press **F**. |
 | **RX 400/500 series, Vega** | **Not fixed by AMD yet. Use this fix ([steps below](#fix-it)).** |
 
@@ -66,7 +66,7 @@ Not every PC is affected, even with the same card and driver. See [Who is affect
 
 ## Fix it
 
-1. Download **[atieclxx-fix.zip](https://github.com/candygoogy/atieclxx-fix/releases/latest/download/atieclxx-fix.zip)** and extract it.
+1. Download **[atieclxx-fix.zip](https://github.com/candygoogy/atieclxx-fix/releases/latest/download/atieclxx-fix.zip)** and extract it (right-click → **Extract All**). Running it from inside the zip doesn't work.
 2. Double-click **`Fix-SSD-Writes.cmd`** and accept the admin prompt.
 3. Press **F**.
 
@@ -108,7 +108,7 @@ No service, scheduled task or startup entry points to that copy. The utility app
 
 - the status line shows `APPLIED, but the driver changed since`
 - the script lifts the block and lets the new driver refresh its copy
-- if the new driver still has the bug, it blocks it again; if AMD's fix works, it leaves things alone
+- if the new driver still has the bug, it blocks it again; if AMD's fix works, it leaves the block off and says so
 
 You don't need to undo anything before updating. If you'd rather start clean, **U** removes the fix.
 
@@ -138,6 +138,7 @@ You don't need to undo anything before updating. If you'd rather start clean, **
 ## Tested on
 
 - Windows 11, Radeon RX 9070 XT, Adrenalin 26.10.2 (driver 32.0.32015.12012), AMD X870E motherboard
+- The same PC on Adrenalin 26.11.1 (driver 32.0.32015.16001): AMD's fix works there, with no writes after the block was removed
 - Windows PowerShell 5.1 and PowerShell 7
 
 Reports from users (thanks!):
