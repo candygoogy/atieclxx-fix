@@ -34,11 +34,24 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$Version   = '1.0.2'
+$Version   = '1.1.0'
 $Copy      = Join-Path $env:SystemRoot 'System32\config\systemprofile\AppData\Local\AMD\atieclxx.exe'
 $SystemSid = 'S-1-5-18'
 # Normal background writes from this utility are close to zero. The bug writes ~650 KB/s.
 $AffectedBytesPerSec = 50KB
+# Polaris and Vega (GCN) cards: RX 460-590, RX 640, Vega, Radeon VII. AMD's 26.11.1 fix
+# doesn't cover them yet. The word boundaries keep RDNA's RX 5500-5700 out.
+$GcnPattern = '\bRX\s*(4[6-9]0|5[0-9]0|640)X?\b|\bVega\b|Radeon\s+VII\b'
+
+function Get-AmdGpus {
+    # Every AMD GPU: PCs with a Ryzen iGPU have two, and the first one isn't always the card.
+    @(Get-CimInstance Win32_VideoController | Where-Object { $_.Name -match 'Radeon|AMD' })
+}
+
+function Test-GcnCard {
+    foreach ($g in Get-AmdGpus) { if ($g.Name -match $GcnPattern) { return $true } }
+    return $false
+}
 
 function Test-Admin {
     $id = [Security.Principal.WindowsIdentity]::GetCurrent()
@@ -118,8 +131,7 @@ function Show-Status {
     if ($script:StatusShown) { return $proc }
     $script:StatusShown = $true
     $admin = Test-Admin
-    # List every AMD GPU: PCs with a Ryzen iGPU have two, and the first one isn't always the card.
-    $gpus  = @(Get-CimInstance Win32_VideoController | Where-Object { $_.Name -match 'Radeon|AMD' })
+    $gpus  = Get-AmdGpus
 
     Write-Host ''
     Write-Host ("atieclxx-fix {0}" -f $Version) -ForegroundColor Cyan
@@ -154,9 +166,24 @@ function Invoke-Check {
     Write-Host ''
     if ($rate -ge $AffectedBytesPerSec) {
         Write-Host '  AFFECTED: the utility is constantly writing to your system drive.' -ForegroundColor Red
-        Write-Host '  Run the fix (as administrator) to stop it.'
+        if (Test-GcnCard) {
+            Write-Host '  AMD has not fixed this for Polaris and Vega cards yet.'
+            Write-Host '  Run the fix (as administrator) to stop it.'
+        } else {
+            Write-Host '  AMD fixed this in Adrenalin 26.11.1 for RX 7000 and newer. Update the driver,'
+            Write-Host '  or run the fix (as administrator) to stop it now.'
+        }
     } else {
         Write-Host '  OK: no constant writes from atieclxx.exe right now.' -ForegroundColor Green
+        # With the block on, zero writes don't say whether the driver still has the bug.
+        if ((Test-Admin) -and (Test-FixApplied)) {
+            if (Test-CopyStale) {
+                Write-Host '  The fix is applied, and the AMD driver has changed since. Run Fix once:'
+                Write-Host '  it removes the block if the new driver no longer needs it.'
+            } else {
+                Write-Host '  The fix is applied. To see whether your driver still needs it, run Undo, then Check.'
+            }
+        }
     }
 }
 
@@ -167,10 +194,12 @@ function Invoke-Fix {
 
     # After a driver update the blocked copy is the old version. Let the new driver
     # refresh it, then test the new driver from scratch.
+    $lifted = $false
     if ((Test-FixApplied) -and (Test-CopyStale)) {
         Write-Host ''
         Write-Host '  The AMD driver changed since the fix was applied. Letting it refresh its copy...'
         Remove-Block
+        $lifted = $true
         Start-Sleep -Seconds 5
         if (Test-CopyStale) { Write-Host '  (The copy has not refreshed yet. That is fine; testing anyway.)' -ForegroundColor DarkGray }
     }
@@ -186,7 +215,12 @@ function Invoke-Fix {
         Write-Host ("  {0}/s" -f (Format-Bytes $before))
         if ($before -lt $AffectedBytesPerSec) {
             Write-Host ''
-            Write-Host '  Not affected: atieclxx.exe is not constantly writing, so nothing was changed.' -ForegroundColor Green
+            if ($lifted) {
+                Write-Host '  The new AMD driver no longer has the bug, so the block was removed.' -ForegroundColor Green
+                Write-Host '  Nothing else to do.'
+            } else {
+                Write-Host '  Not affected: atieclxx.exe is not constantly writing, so nothing was changed.' -ForegroundColor Green
+            }
             return
         }
         if (-not (Test-Path -LiteralPath $Copy)) {
@@ -223,6 +257,9 @@ function Invoke-Undo {
     Remove-Block
     Write-Host '  Undone. Permissions on the copy are back to normal.' -ForegroundColor Green
 }
+
+# Dot-sourcing (". .\atieclxx-fix.ps1") only loads the functions, for the tests in tests\.
+if ($MyInvocation.InvocationName -eq '.') { return }
 
 try {
     if ($Check) { Invoke-Check }

@@ -2,13 +2,22 @@
 
 Stops the AMD Radeon driver from writing **40–55 GB a day** to your system SSD, and keeps the AMD service running.
 
-> **Update, 12 November 2026: AMD fixed this in Adrenalin 26.11.1.** Its release notes list excessive writes to the system drive while idle as fixed on RX 7000 series and newer. On the test PC (RX 9070 XT, 26.11.1 installed over 26.10.2), the utility writes 0 B/s with the block removed. 26.11.1 doesn't bring back the missing amdkmpfd files: the driver no longer sets up that install at all.
->
-> **If you used this fix:** update to 26.11.1, then run `Fix-SSD-Writes.cmd` → **U** (Undo), then **C** (Check). If Check says OK, you don't need the fix anymore.
->
-> **Polaris and Vega cards (RX 400/500 series, Vega) are not fixed yet.** They use a separate driver branch (the 26.5.2 Polaris driver is on it), and the bug is confirmed there on an RX 560 and an RX 580. AMD's rep u/AMD_Vik [says](https://www.reddit.com/r/Amd/comments/1xrpb1o/amd_confirms_radeon_driver_bug_causing_constant/19sfum5ywvcw0/) the filter driver works differently on these cards, so the fix "may take us a while to work in". Keep the fix applied, or apply it now.
->
-> **RX 5000/6000:** not named in the 26.11.1 notes. After updating, run **C**; if it still says AFFECTED, apply the fix with **F**.
+Quick start in other languages: [简体中文](docs/README.zh-CN.md) · [Português (Brasil)](docs/README.pt-BR.md) · [Español](docs/README.es.md)
+
+## Do I still need this?
+
+AMD fixed the bug in **Adrenalin 26.11.1** (12 November 2026) for RX 7000 and newer. Polaris and Vega cards aren't fixed yet.
+
+| Your card | What to do |
+|---|---|
+| **RX 7000, RX 9000** | Update to Adrenalin 26.11.1. If you applied this fix, run it once more and press **U** (Undo), then **C** (Check). |
+| **RX 5000, RX 6000** | Not named in AMD's release notes. Update, then press **C**. If it says AFFECTED, press **F**. |
+| **RX 400/500 series, Vega** | **Not fixed by AMD yet. Use this fix ([steps below](#fix-it)).** |
+
+Since version 1.1.0, **Check** also says which of these applies to your PC.
+
+- **Polaris and Vega:** they use a separate driver branch (the 26.5.2 Polaris driver is on it), and the bug is confirmed there on an RX 560 and an RX 580. AMD's rep u/AMD_Vik [says](https://www.reddit.com/r/Amd/comments/1xrpb1o/amd_confirms_radeon_driver_bug_causing_constant/19sfum5ywvcw0/) the filter driver works differently on these cards, so the fix "may take us a while to work in".
+- **The test PC on 26.11.1** (RX 9070 XT, installed over 26.10.2): with the block removed, the utility wrote nothing new in 13 hours. 26.11.1 doesn't bring back the missing amdkmpfd files; the driver no longer starts that install at all ([details](docs/how-it-works.md#7-amds-fix-in-adrenalin-26111)).
 
 In November 2026, Radeon owners noticed `atieclxx.exe` (the "AMD External Events Utility" that ships with Adrenalin) writing to disk nonstop, even on an idle PC. AMD confirmed the bug and fixed it in Adrenalin 26.11.1 (see above). Before that, the usual advice was to disable the service, which breaks FreeSync on some PCs.
 
