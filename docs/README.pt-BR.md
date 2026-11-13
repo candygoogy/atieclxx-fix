@@ -11,7 +11,7 @@ A AMD corrigiu o bug no **Adrenalin 26.11.1** (12 de novembro de 2026) para RX 7
 | Sua placa | O que fazer |
 |---|---|
 | **RX 7000, RX 9000** | Atualize para o Adrenalin 26.11.1. Se você aplicou esta correção, rode de novo e aperte **F**: ela remove o bloqueio quando o driver novo não precisa mais dele. |
-| **RX 5000, RX 6000** | Não aparecem nas notas da AMD. Atualize e aperte **C**. Se aparecer AFFECTED, aperte **F**. |
+| **RX 5000, RX 6000** | Não aparecem nas notas da AMD, e uma RX 6950 XT ainda tem o bug no 26.11.1. Aperte **C**. Se aparecer AFFECTED, aperte **F**. |
 | **Série RX 400/500 (como a RX 580), Vega** | **A AMD ainda não corrigiu. Use esta correção (passos abaixo).** |
 
 ## Como usar

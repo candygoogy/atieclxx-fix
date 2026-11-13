@@ -152,4 +152,4 @@ What changed, checked on the test PC:
 
 **Cards the fix doesn't cover.** Polaris and Vega cards use a separate driver branch and still have the bug (confirmed on an RX 560 and an RX 580, both on the 26.5.2 Polaris driver). u/AMD_Vik [says](https://www.reddit.com/r/Amd/comments/1xrpb1o/amd_confirms_radeon_driver_bug_causing_constant/19sfum5ywvcw0/) the filter driver has different responsibilities on those cards, so the change made for the newer branches can't simply be carried over, and it "may take us a while to work in".
 
-Not tested yet: a clean install of 26.11.1, and RX 5000 and RX 6000 cards, which had the bug (RX 6700 XT) but aren't named in the release notes.
+Not tested yet: a clean install of 26.11.1, and RX 5000 cards. RX 6000 cards aren't named in the release notes either, and a user report shows the fix doesn't cover them: an RX 6950 XT updated to 26.11.1 still wrote 966 KB/s, and 0 B/s after the block (u/The_Goose_II).
