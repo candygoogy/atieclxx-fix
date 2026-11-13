@@ -180,6 +180,10 @@ Reports from other GPUs and driver versions help. [Open an issue](https://github
 
 This is an independent workaround, not an AMD product. Use it at your own risk; **Undo** puts everything back.
 
+## Saying thanks
+
+The fix is free and stays free. If it saved your SSD and you want to say thanks, there's a Sponsor button at the top of this page. It's never expected.
+
 ## License
 
 [MIT](LICENSE)
