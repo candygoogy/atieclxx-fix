@@ -6,18 +6,18 @@ Quick start in other languages: [简体中文](docs/README.zh-CN.md) · [Portugu
 
 ## Do I still need this?
 
-AMD fixed the bug in **Adrenalin 26.11.1** (12 November 2026) for RX 7000 and newer. Polaris and Vega cards aren't fixed yet, and an RX 6950 XT still has the bug on 26.11.1.
+AMD fixed the bug in **Adrenalin 26.11.1** (12 November 2026) for RX 7000 and newer. Polaris and Vega cards aren't fixed yet, and RX 6000 cards still have the bug on 26.11.1 (an RX 6650 XT and an RX 6950 XT).
 
 | Your card | What to do |
 |---|---|
 | **RX 7000, RX 9000** | Update to Adrenalin 26.11.1. If you applied this fix, run it once more and press **F**: it removes the block when the new driver no longer needs it. |
-| **RX 5000, RX 6000** | Not named in AMD's release notes, and an RX 6950 XT still has the bug on 26.11.1. Press **C**. If it says AFFECTED, press **F**. |
+| **RX 5000, RX 6000** | Not named in AMD's release notes, and RX 6000 cards still have the bug on 26.11.1 (6650 XT, 6950 XT). Press **C**. If it says AFFECTED, press **F**. |
 | **RX 400/500 series, Vega** | **Not fixed by AMD yet. Use this fix ([steps below](#fix-it)).** |
 
 If **Check** finds the bug, it also says what to do for your card.
 
 - **Polaris and Vega:** they use a separate driver branch (the 26.5.2 Polaris driver is on it), and the bug is confirmed there on an RX 560 and an RX 580. AMD's rep u/AMD_Vik [says](https://www.reddit.com/r/Amd/comments/1xrpb1o/amd_confirms_radeon_driver_bug_causing_constant/19sfum5ywvcw0/) the filter driver works differently on these cards, so the fix "may take us a while to work in".
-- **The test PC on 26.11.1** (RX 9070 XT, installed over 26.10.2): with the block removed, the utility wrote nothing new in 13 hours. 26.11.1 doesn't bring back the missing amdkmpfd files; the driver no longer starts that install at all ([details](docs/how-it-works.md#7-amds-fix-in-adrenalin-26111)).
+- **The test PC on 26.11.1** (RX 9070 XT, installed over 26.10.2): with the block removed, the utility wrote nothing new in 13 hours. After a clean Driver Only install of 26.11.1 it wrote nothing at all. 26.11.1 doesn't bring back the missing amdkmpfd files; the driver no longer starts that install at all ([details](docs/how-it-works.md#7-amds-fix-in-adrenalin-26111)).
 
 In November 2026, Radeon owners noticed `atieclxx.exe` (the "AMD External Events Utility" that ships with Adrenalin) writing to disk nonstop, even on an idle PC. AMD confirmed the bug and fixed it in Adrenalin 26.11.1 (see above). Before that, the usual advice was to disable the service, which breaks FreeSync on some PCs.
 
@@ -138,7 +138,7 @@ You don't need to undo anything before updating. If you'd rather start clean, **
 ## Tested on
 
 - Windows 11, Radeon RX 9070 XT, Adrenalin 26.10.2 (driver 32.0.32015.12012), AMD X870E motherboard
-- The same PC on Adrenalin 26.11.1 (driver 32.0.32015.16001): AMD's fix works there, with no writes after the block was removed
+- The same PC on Adrenalin 26.11.1 (driver 32.0.32015.16001): AMD's fix works there, with no writes after the block was removed, and none after a clean Driver Only install
 - Windows PowerShell 5.1 and PowerShell 7
 
 Reports from users (thanks!):
@@ -151,8 +151,10 @@ Reports from users (thanks!):
 | RX 9060 XT | 26.10.1, 26.10.2 | fixed, 662 KB/s → 0 B/s, on Windows 26H2, and still fixed after DDU and a clean reinstall | SkittlezAU ([#5](https://github.com/candygoogy/atieclxx-fix/issues/5)); loop also seen by u/Halicos93 |
 | RX 7900 XTX | 26.9.2, 26.10.1, 26.10.2 | fixed, 54 GB/day → 0 B/s | u/schnepy and a friend, u/Electrical-Bobcat435 |
 | RX 7800 XT | 26.10.1 | fixed | u/Antique-Editor-9001 |
+| RX 7800 XT | 26.11.1 | AMD's fix works: about 0.6 MB/s on the old driver, 0 after updating | u/meinkun |
 | RX 7600 | latest | same loop seen, about 1.3 MB/s | u/skylog6593 |
 | RX 6950 XT | 26.11.1 | still looped after updating to 26.11.1; fixed, 966 KB/s → 0 B/s | u/The_Goose_II |
+| RX 6650 XT | 26.11.1 | still loops on 26.11.1, on Windows 10 | u/flopinn |
 | RX 6700 XT | not given | fixed | u/enduser1980 |
 | RX 580 | 26.5.2 | fixed | u/DavidAstonish |
 
@@ -160,7 +162,7 @@ Also reported fixed, card not given: u/wankerbanker85, u/Any_Juggernaut_112, u/F
 
 ## Who is affected
 
-The bug has been seen on RX 560 (u/zaudio33), RX 580, RX 6700 XT, RX 6950 XT, RX 7600, RX 7800 XT, RX 7900 XTX, RX 9060 XT, RX 9070 and RX 9070 XT, with Adrenalin 26.5.1 and 26.5.2, 26.9.2 to 26.10.2, and 26.11.1 on an RX 6950 XT, on AMD and Intel motherboards. 26.3.1 and older still shipped the amdkmpfd files, so the change came between 26.3.1 and 26.5.1. The oldest report is an RX 9070 XT on 26.5.1 that had written 890 GB in 256 hours (u/dangderr).
+The bug has been seen on RX 560 (u/zaudio33), RX 580, RX 6650 XT, RX 6700 XT, RX 6800 (u/GeForce_GTX_1050Ti), RX 6950 XT, RX 7600, RX 7800 XT, RX 7900 XTX, RX 9060 XT, RX 9070 and RX 9070 XT, with Adrenalin 26.5.1 and 26.5.2, 26.9.2 to 26.10.2, and 26.11.1 on an RX 6650 XT and an RX 6950 XT, on AMD and Intel motherboards. 26.3.1 and older still shipped the amdkmpfd files, so the change came between 26.3.1 and 26.5.1. The oldest report is an RX 9070 XT on 26.5.1 that had written 890 GB in 256 hours (u/dangderr).
 
 Other people with the same cards and drivers see no writes at all. Reports of no loop so far: RX 6750 XT, RX 6800 XT, RX 6950 XT, some RX 7900 XTX, RX 9070 and RX 9070 XT owners, a Radeon 780M laptop on an older driver ([#2](https://github.com/candygoogy/atieclxx-fix/issues/2)), another 780M laptop on Adrenalin 26.10.1 (u/xeizoo), and a Ryzen 5 5600G on Adrenalin 24.3.1.
 
