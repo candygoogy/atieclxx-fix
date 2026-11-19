@@ -139,6 +139,7 @@ You don't need to undo anything before updating. If you'd rather start clean, **
 
 - Windows 11, Radeon RX 9070 XT, Adrenalin 26.10.2 (driver 32.0.32015.12012), AMD X870E motherboard
 - The same PC on Adrenalin 26.11.1 (driver 32.0.32015.16001): AMD's fix works there, with no writes after the block was removed, and none after a clean Driver Only install
+- The same PC on Adrenalin 26.11.2 (driver 32.0.32029.2010, Driver Only): still no writes
 - Windows PowerShell 5.1 and PowerShell 7
 
 Reports from users (thanks!):
