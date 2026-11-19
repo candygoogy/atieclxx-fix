@@ -6,12 +6,12 @@ Quick start in other languages: [简体中文](docs/README.zh-CN.md) · [Portugu
 
 ## Do I still need this?
 
-AMD fixed the bug in **Adrenalin 26.11.1** (12 November 2026) for RX 7000 and newer. Polaris and Vega cards aren't fixed yet, and RX 6000 cards still have the bug on 26.11.1 (an RX 6650 XT and an RX 6950 XT).
+AMD fixed the bug in **Adrenalin 26.11.1** (12 November 2026) for RX 7000 and newer. **Adrenalin 26.11.2** (18 November) adds RX 5000 and RX 6000 cards, but its release notes name Windows 10 only. Polaris and Vega cards aren't fixed yet.
 
 | Your card | What to do |
 |---|---|
 | **RX 7000, RX 9000** | Update to Adrenalin 26.11.1. If you applied this fix, run it once more and press **F**: it removes the block when the new driver no longer needs it. |
-| **RX 5000, RX 6000** | Not named in AMD's release notes, and RX 6000 cards still have the bug on 26.11.1 (6650 XT, 6950 XT). Press **C**. If it says AFFECTED, press **F**. |
+| **RX 5000, RX 6000** | Adrenalin 26.11.2 fixes it on Windows 10 (26.11.1 didn't: an RX 6650 XT and an RX 6950 XT still looped). Update, then press **C**. If it still says AFFECTED (for example on Windows 11), press **F**. |
 | **RX 400/500 series, Vega** | **Not fixed by AMD yet. Use this fix ([steps below](#fix-it)).** |
 
 If **Check** finds the bug, it also says what to do for your card.

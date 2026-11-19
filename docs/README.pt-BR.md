@@ -6,12 +6,12 @@ Explicação completa (em inglês): [README](../README.md)
 
 ## Ainda preciso disso?
 
-A AMD corrigiu o bug no **Adrenalin 26.11.1** (12 de novembro de 2026) para RX 7000 e mais novas. Placas Polaris e Vega ainda não foram corrigidas.
+A AMD corrigiu o bug no **Adrenalin 26.11.1** (12 de novembro de 2026) para RX 7000 e mais novas. O **Adrenalin 26.11.2** (18 de novembro) inclui as RX 5000 e RX 6000, mas as notas citam só o Windows 10. Placas Polaris e Vega ainda não foram corrigidas.
 
 | Sua placa | O que fazer |
 |---|---|
 | **RX 7000, RX 9000** | Atualize para o Adrenalin 26.11.1. Se você aplicou esta correção, rode de novo e aperte **F**: ela remove o bloqueio quando o driver novo não precisa mais dele. |
-| **RX 5000, RX 6000** | Não aparecem nas notas da AMD, e placas RX 6000 ainda têm o bug no 26.11.1 (6650 XT, 6950 XT). Aperte **C**. Se aparecer AFFECTED, aperte **F**. |
+| **RX 5000, RX 6000** | O Adrenalin 26.11.2 corrige no Windows 10 (o 26.11.1 não corrigia). Atualize e aperte **C**. Se ainda aparecer AFFECTED (por exemplo no Windows 11), aperte **F**. |
 | **Série RX 400/500 (como a RX 580), Vega** | **A AMD ainda não corrigiu. Use esta correção (passos abaixo).** |
 
 ## Como usar

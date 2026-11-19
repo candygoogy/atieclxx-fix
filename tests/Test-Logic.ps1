@@ -70,7 +70,7 @@ New-State $Rdna4 @($Bug) $false $false
 Expect 'Check, RX 9070 XT, affected' (Run { Invoke-Check }) @('AFFECTED', 'fixed this in Adrenalin 26.11.1') @('Polaris')
 
 New-State 'AMD Radeon RX 6600' @($Bug) $false $false
-Expect 'Check, RX 6600, affected' (Run { Invoke-Check }) @('AFFECTED', 'not your card', 'Run the fix') @('Update the driver', 'Polaris')
+Expect 'Check, RX 6600, affected' (Run { Invoke-Check }) @('AFFECTED', 'Adrenalin 26.11.2', 'Windows 10 only', 'run the fix') @('not your card', 'Polaris', 'RX 7000 and newer')
 
 New-State @('AMD Radeon(TM) Vega 11 Graphics', $Rdna4) @($Bug) $false $false
 Expect 'Check, Vega iGPU + RX 9070 XT, affected' (Run { Invoke-Check }) @('AFFECTED', 'fixed this in Adrenalin 26.11.1') @('Polaris')

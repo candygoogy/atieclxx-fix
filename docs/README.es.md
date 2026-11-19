@@ -6,12 +6,12 @@ Explicación completa (en inglés): [README](../README.md)
 
 ## ¿Todavía lo necesito?
 
-AMD corrigió el fallo en **Adrenalin 26.11.1** (12 de noviembre de 2026) para RX 7000 y posteriores. Las tarjetas Polaris y Vega todavía no están corregidas.
+AMD corrigió el fallo en **Adrenalin 26.11.1** (12 de noviembre de 2026) para RX 7000 y posteriores. **Adrenalin 26.11.2** (18 de noviembre) añade las RX 5000 y RX 6000, pero sus notas solo nombran Windows 10. Las tarjetas Polaris y Vega todavía no están corregidas.
 
 | Tu tarjeta | Qué hacer |
 |---|---|
 | **RX 7000, RX 9000** | Actualiza a Adrenalin 26.11.1. Si aplicaste esta solución, ejecútala otra vez y pulsa **F**: quita el bloqueo cuando el driver nuevo ya no lo necesita. |
-| **RX 5000, RX 6000** | No aparecen en las notas de AMD, y las tarjetas RX 6000 todavía tienen el fallo con 26.11.1 (6650 XT, 6950 XT). Pulsa **C**. Si dice AFFECTED, pulsa **F**. |
+| **RX 5000, RX 6000** | Adrenalin 26.11.2 lo corrige en Windows 10 (26.11.1 no lo hacía). Actualiza y pulsa **C**. Si todavía dice AFFECTED (por ejemplo en Windows 11), pulsa **F**. |
 | **Serie RX 400/500 (como la RX 580), Vega** | **AMD todavía no lo ha corregido. Usa esta solución (pasos abajo).** |
 
 ## Cómo usarlo

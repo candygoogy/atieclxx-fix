@@ -34,7 +34,7 @@ param(
 )
 
 $ErrorActionPreference = 'Stop'
-$Version   = '1.1.2'
+$Version   = '1.1.3'
 $Copy      = Join-Path $env:SystemRoot 'System32\config\systemprofile\AppData\Local\AMD\atieclxx.exe'
 $SystemSid = 'S-1-5-18'
 # Normal background writes from this utility are close to zero. The bug writes ~650 KB/s.
@@ -44,8 +44,8 @@ $AffectedBytesPerSec = 50KB
 # built into Ryzen CPUs aren't matched: which driver branch covers them isn't known, and
 # the general advice fits them either way.
 $GcnPattern = '\bRX\s*(4[6-9]0|5[0-9]0|640)X?\b|\bRX\s+Vega\b|Radeon\s+VII\b'
-# RX 5000 and RX 6000 cards (RX 5300-5700, RX 6300-6950, desktop and laptop): not named in
-# AMD's 26.11.1 release notes.
+# RX 5000 and RX 6000 cards (RX 5300-5700, RX 6300-6950, desktop and laptop): not covered by
+# 26.11.1; AMD's 26.11.2 release notes name them on Windows 10 only.
 $Rdna12Pattern = '\bRX\s*(5[3-7]|6[3-9])[05]0(?!\d)'
 
 function Get-AmdGpus {
@@ -191,8 +191,9 @@ function Invoke-Check {
             }
             default {
                 if (Test-Rdna12Card) {
-                    Write-Host '  AMD''s fix in Adrenalin 26.11.1 names RX 7000 and newer, not your card.'
-                    Write-Host '  Run the fix (as administrator) to stop it.'
+                    Write-Host '  AMD''s fix for RX 5000/6000 is in Adrenalin 26.11.2 and names Windows 10 only.'
+                    Write-Host '  Update the driver and run Check again; if it still says AFFECTED, run the fix'
+                    Write-Host '  (as administrator).'
                 } else {
                     Write-Host '  AMD fixed this in Adrenalin 26.11.1 for RX 7000 and newer. Update the driver,'
                     Write-Host '  or run the fix (as administrator) to stop it now.'
